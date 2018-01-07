@@ -4,8 +4,8 @@
 % ==========
 % INITIALIZE
 % ==========
-clear all;        % Erase everything from Matlab environment
-CONSTANTS;        % Set physical constants
+clear all;          % Erase everything from Matlab environment
+CONSTANTS;          % Set physical constants
 
 % ============
 % SYSTEM MODEL
@@ -14,4 +14,5 @@ CONSTANTS;        % Set physical constants
 %   - comment out the following two lines to use default values
 %   - manually bypass all integrators in the Controller block
 
-Controller;       % Overwrite PID gains & throughput values
+Robot;              % Declare parameters
+Controller;         % Overwrite PID gains & throughput values
