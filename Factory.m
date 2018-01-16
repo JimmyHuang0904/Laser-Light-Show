@@ -6,6 +6,7 @@
 % ==========
 clear all;          % Erase everything from Matlab environment
 CONSTANTS;          % Set physical constants
+%DEFAULT;            %justine added this
 
 % ============
 % SYSTEM MODEL

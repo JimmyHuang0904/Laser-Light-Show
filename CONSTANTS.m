@@ -4,6 +4,7 @@
 %%%%%%%%%%%%%%%%%%%%%%
 % Physical Constants %
 %%%%%%%%%%%%%%%%%%%%%%
+D = 10; 
 G = 9.81;               % m/s^2
 FtPerM = 3.28;          % ft/m
 RadPerDeg = pi/180;     % rad/deg
