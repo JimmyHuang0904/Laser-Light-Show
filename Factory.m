@@ -8,6 +8,8 @@ clear all;          % Erase everything from Matlab environment
 CONSTANTS;          % Set physical constants
 %DEFAULT;            %justine added this
 
+SampleTime = 10;
+
 % ============
 % SYSTEM MODEL
 % ============
@@ -17,4 +19,4 @@ CONSTANTS;          % Set physical constants
 
 Robot;              % Declare parameters
 Controller;         % Overwrite PID gains & throughput values
-Jacob;
+%Jacob; %Not using Jacob.m for now

@@ -17,12 +17,25 @@ Sml = 1e-6;             % General purpose small number
 % Specifications %
 %%%%%%%%%%%%%%%%%%
 
+
+%  Joint Controller
+%     Amplifier
+% ==================
+Amp0n = [1];
+Amp0d = [1];
+Amp1n = [1];
+Amp1d = [1];
+%    Back EMF
+% ==================
+BackEMF0 = 1;
+BackEMF1 = 1;
+
 %  Rotary Joints
 % ===============
 
 %  Joint 1 - Between yaw motor and pitch motor
 % =============================================
-Height1 = 5;            % cm
+Height = 5;            % cm
 
 
 %  Joint 2 - Between pitch motor and end effector
