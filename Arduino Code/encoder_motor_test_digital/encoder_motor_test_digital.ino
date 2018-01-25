@@ -1,13 +1,14 @@
 //from http://howtomechatronics.com/tutorials/arduino/arduino-dc-motor-control-tutorial-l298n-pwm-h-bridge/
+//http://playground.arduino.cc/Main/RotaryEncoders#Intro
 //PWM from 0 to 255 for some reason
 
 #define enable 9
 #define dir1 6
-#define dir2 2
-#define pushSpd 3
+#define dir2 1
+#define pushSpd 5
 #define pushDir 4
-#define encPinA 1
-#define encPinB 5
+#define encPinA 2
+#define encPinB 3
 
 int encoderA = 0;
 int encoderB = 0;
@@ -21,14 +22,26 @@ int pressedSpd = false;
 int speed = 5; 
 int pwmOutput= 0; 
 
+volatile unsigned int encoder0Pos = 0;
+
 void setup() {
   Serial.begin(9600);  
   
+  pinMode(encPinA, INPUT); 
+  pinMode(encPinB, INPUT);
+   
   pinMode(enable, OUTPUT);
   pinMode(dir1, OUTPUT);
   pinMode(dir2, OUTPUT);
+  
   pinMode(pushDir, INPUT);
   pinMode(pushSpd, INPUT);
+
+   // encoder pin on interrupt 0 (pin 2)
+  attachInterrupt(0, doEncoderA, CHANGE);
+  // encoder pin on interrupt 1 (pin 3)
+  attachInterrupt(1, doEncoderB, CHANGE);
+
   // Set initial rotation direction
   digitalWrite(dir1, LOW);
   digitalWrite(dir2, HIGH);
@@ -39,8 +52,10 @@ void loop() {
   encoderA = digitalRead(encPinA);
   encoderB = digitalRead(encPinB);
 
-  //Serial.print("value: \n");
-  Serial.println(encoderA);
+  //Serial.print(encoder0Pos);
+  Serial.println(encoder0Pos, DEC);
+  Serial.print("value: \n");
+  //Serial.println(encoderA);
   //Serial.println(encoderB);
 
   //debounce and read speed button 
@@ -58,9 +73,9 @@ void loop() {
     }
   }
   pressedSpd = false; 
-  
   //Serial.print("speed: \n");
   //Serial.print(speed); 
+  
   pwmOutput = map(speed, 0, 20, 0 , 255); // Map the speed value from 0 to 255
   analogWrite(enable, pwmOutput); // Send PWM signal to L298N Enable pin
   
@@ -87,16 +102,58 @@ void loop() {
     delay(20);
   }
 
-    // Logic for counting the posedge
-  if( !encoderA & blocked == false){
-    Serial.println(count);
-    blocked = true;
-    count++;
+}
+
+void doEncoderA() {
+  //Serial.print("asdf");
+  // look for a low-to-high on channel A
+  if (digitalRead(encPinA) == HIGH) {
+
+    // check channel B to see which way encoder is turning
+    if (digitalRead(encPinB) == LOW) {
+      encoder0Pos = encoder0Pos + 1;         // CW
+    }
+    else {
+      encoder0Pos = encoder0Pos - 1;         // CCW
+    }
   }
 
-  if ( encoderA ){
-    blocked = false;
+  else   // must be a high-to-low edge on channel A
+  {
+    // check channel B to see which way encoder is turning
+    if (digitalRead(encPinB) == HIGH) {
+      encoder0Pos = encoder0Pos + 1;          // CW
+    }
+    else {
+      encoder0Pos = encoder0Pos - 1;          // CCW
+    }
+  }
+  //Serial.println(encoder0Pos, DEC);
+  // use for debugging - remember to comment out
+}
+
+void doEncoderB() {
+  // look for a low-to-high on channel B
+  if (digitalRead(encPinB) == HIGH) {
+
+    // check channel A to see which way encoder is turning
+    if (digitalRead(encPinA) == HIGH) {
+      encoder0Pos = encoder0Pos + 1;         // CW
+    }
+    else {
+      encoder0Pos = encoder0Pos - 1;         // CCW
+    }
   }
 
+  // Look for a high-to-low on channel B
 
+  else {
+    // check channel B to see which way encoder is turning
+    if (digitalRead(encPinA) == LOW) {
+      encoder0Pos = encoder0Pos + 1;          // CW
+    }
+    else {
+      encoder0Pos = encoder0Pos - 1;          // CCW
+    }
+  }
 }
