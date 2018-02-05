@@ -22,7 +22,7 @@ int pressed = false;
 int pressedSpd = false;
 int pressedRst = false;
 
-int speed = 5; 
+int speed = 2; 
 int pwmOutput= 0; 
 
 volatile signed int encoder0Pos = 0;
@@ -64,7 +64,6 @@ void loop() {
   Serial.print(encoder0Pos, DEC);
   Serial.print("   ");
   Serial.println(MeasuredTime);
-  delay(20);
 
   // Reset Button - Resets encoder position and time
   if (digitalRead(pushRst) == true) {
