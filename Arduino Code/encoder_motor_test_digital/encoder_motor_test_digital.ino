@@ -3,12 +3,12 @@
 //PWM from 0 to 255 for some reason
 
 #define enable 9
-#define dir1 6
+#define dir1 7
 #define dir2 1
 #define pushSpd 5
 #define pushDir 4
-#define encPinA 2
-#define encPinB 3
+#define encPinA 3
+#define encPinB 4
 
 int encoderA = 0;
 int encoderB = 0;
