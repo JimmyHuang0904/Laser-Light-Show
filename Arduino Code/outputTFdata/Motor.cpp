@@ -58,7 +58,7 @@ void Motor::hardStop()
 
 long Motor::getRotSpeed(int interval, unsigned long deg)
 {
-	unsigned long time0 = millis();
+	/*unsigned long time0 = millis();
 	pos0 = encoderPos;
 	
 	while( (millis() - time0) < interval);
@@ -66,5 +66,5 @@ long Motor::getRotSpeed(int interval, unsigned long deg)
 	
 	long tickPerMilSec = (pos1 - pos2)/(interval);
 	return (tickPerMilSec*deg*1000); 
-	
+	*/
 }

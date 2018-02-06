@@ -1,5 +1,5 @@
 /*
-  motorUtilities.ino
+  Measure and output TF data to csv file. 
   Code that runs basic functions in the Motors class
   The two motors are refered to as Motor A and Motor B.
   For each motor, there is an Encoder 1 and Encoder 2. 
@@ -9,18 +9,27 @@
 #include "Arduino.h"
 #include "Motor.h"
 
-#define enablePinA	0
-#define dirPinA1 4
-#define dirPinA2 5
+#define enablePinA 9
+#define dirPinA1 5
+//#define dirPinA2 5
 #define encPinA1 2
 #define encPinA2 3
+#define startPin 6
+
+#define timeInterval 2000	//length of time for sampled data in milliseconds
+
 
 volatile signed int encoderAPos = 0;
+int pressedStart = false;
+int timeStart = 0; 
+int recordFlag = 0; 
+unsigned long measuredTime = 0;
 
-Motor motorA(enablePinA, dirPinA1, dirPinA2);
+Motor motorA(enablePinA, encPinA1, encPinA2);
 
 void setup() {
   Serial.begin(9600);
+  //increase buad rate from 9600 to speed up communication?? 
 
   pinMode(encPinA1, INPUT); 
   pinMode(encPinA2, INPUT);
@@ -28,27 +37,45 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encPinA2), encoderISRA2, CHANGE);
 
   // Set initial motor direction and PWM
-  motorA.setPWM(200); 
+  motorA.setPWM(0); 
   motorA.setDir(1);
   
 }
 
 void loop(){
   //motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, but that possibly slows ISR. possible change later?
-  Serial.print("\n encoder values: \n");
-  Serial.print(encoderAPos, DEC);
-  Serial.print(" \n"); 
-  Serial.print(motorA.encoderPos, DEC); 
-
-  //test set PWM
-  motorA.setDir(1);
-  motorA.setPWM(200); 
-  delay(1000);
-  motorA.setDir(2);
-  motorA.setPWM(100);
-  delay(1000);
-  motorA.setDir(1);
-  delay(1000);
+  if (recordFlag == 0){
+	  motorA.setPWM(0);
+  }
+  // Reset Button Debounce - Resets encoder position and time
+  if (digitalRead(startPin) == true) {
+    pressedStart = true;
+  }
+  while (digitalRead(startPin) == true);	//can comment this out also? for below reason
+  //delay(20); don't need delay: we don't care about debounce, also we don't want to slow down loop
+  if (pressedStart == true) {
+	Serial.print(" \n \n START DATA \n"); 
+	recordFlag = 1;
+    encoderAPos = 0;
+	timeStart = millis();
+	motorA.setPWM(255);
+  }
+  pressedStart = false;
+  
+  if(recordFlag == 1){
+	  measuredTime = millis() - timeStart; 
+	  Serial.print(measuredTime);
+	  Serial.print(",");
+	  Serial.print(encoderAPos,DEC);
+	  Serial.print(" \n ");
+	  
+	  if(measuredTime > timeInterval){
+		  Serial.print(" END DATA \n");
+		  recordFlag = 0; 
+	  }
+	  
+  }
+  
 }
 
 void encoderISRA1()
@@ -110,4 +137,3 @@ void encoderISRA2(){
   motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
 
 }
-
