@@ -15,15 +15,15 @@ PID1=[205*KD1       0.01*KD1    1*KD1     Nvalue];
 % Rotation Matrices
 % =================
 
-R0_1 = [[cos(Theta1), -sin(Theta1), 0], [0, 0, -1],[sin(Theta1), cos(Theta1), 0]];
-R1_2 = [[cos(Theta2), -sin(Theta2), 0], [sin(Theta2), cos(Theta2), 0], [0, 0, 1]];
+%R0_1 = [[cos(Theta1), -sin(Theta1), 0], [0, 0, -1],[sin(Theta1), cos(Theta1), 0]];
+%R1_2 = [[cos(Theta2), -sin(Theta2), 0], [sin(Theta2), cos(Theta2), 0], [0, 0, 1]];
 
 % ====================
 % Displacement Vectors
 % ====================
 
-D0_1 = [0, 0, Height];
-D1_2 = [Length2*cos(Theta2), Length2*sin(Theta2), 0];
+%D0_1 = [0, 0, Height];
+%D1_2 = [Length2*cos(Theta2), Length2*sin(Theta2), 0];
 
 % ====================
 % Mech Dynamics
@@ -54,6 +54,19 @@ FB1 = [1];
 % Xd, Yd
 % ====================
 
-Xd = [3];
-Yd = [3];
-Time = [1];
+
+Conversion = 1.8/2*pi/180*1000;
+
+zeta = 1.6;
+w0 = (4.65*zeta-1.3)/0.068;
+Kfinal = 125;
+H = tf(Kfinal*w0^2, [1, 2*zeta*w0, w0^2])
+
+Mech0ntest = [Kfinal*w0^2];
+Mech0dtest = [1 2*zeta*w0 w0^2];
+
+
+
+%stepplot(H);
+%grid on;
+%grid minor;

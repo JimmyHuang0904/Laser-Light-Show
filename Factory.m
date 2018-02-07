@@ -5,10 +5,12 @@
 % INITIALIZE
 % ==========
 clear all;          % Erase everything from Matlab environment
+load SolnPart1
 CONSTANTS;          % Set physical constants
+%load XYDesired
 %DEFAULT;            %justine added this
 
-SampleTime = 10;
+SampleTime = 0.02;
 
 % ============
 % SYSTEM MODEL
