@@ -56,7 +56,8 @@ void loop(){
   if (pressedStart == true) {
 	Serial.print(" \n \n START DATA \n"); 
 	recordFlag = 1;
-    encoderAPos = 0;
+  measuredTime = 0; 
+  encoderAPos = 0;
 	timeStart = millis();
 	motorA.setPWM(255);
   }
