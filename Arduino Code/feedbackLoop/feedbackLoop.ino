@@ -1,5 +1,5 @@
 /*
-  Measure and output TF data to csv file. 
+  motorUtilities.ino
   Code that runs basic functions in the Motors class
   The two motors are refered to as Motor A and Motor B.
   For each motor, there is an Encoder 1 and Encoder 2. 
@@ -9,27 +9,22 @@
 #include "Arduino.h"
 #include "Motor.h"
 
-#define enablePinA 9
+#define enablePinA	9
 #define dirPinA1 4
 #define dirPinA2 5
 #define encPinA1 2
 #define encPinA2 3
-#define startPin 6
 
-#define timeInterval 2000	//length of time for sampled data in milliseconds
-
+#define positionDeg 90  //degrees to move
+#define tol 2     //tolerance for position
+#define speedA 30   //pwm for motor
 
 volatile signed int encoderAPos = 0;
-int pressedStart = false;
-int timeStart = 0; 
-int recordFlag = 0; 
-unsigned long measuredTime = 0;
 
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
 void setup() {
   Serial.begin(9600);
-  //increase buad rate from 9600 to speed up communication?? 
 
   pinMode(encPinA1, INPUT); 
   pinMode(encPinA2, INPUT);
@@ -37,46 +32,40 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encPinA2), encoderISRA2, CHANGE);
 
   // Set initial motor direction and PWM
-  motorA.setPWM(0); 
+  motorA.setPWM(speedA); 
   motorA.setDir(1);
   
 }
 
 void loop(){
   //motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, but that possibly slows ISR. possible change later?
-  if (recordFlag == 0){
-	  motorA.setPWM(0);
+//  Serial.print("\n encoder values: \n");
+//  Serial.print(encoderAPos, DEC);
+//  Serial.print(" \n"); 
+//  Serial.print(motorA.encoderPos, DEC); 
+
+  double encoderTicks = positionDeg*(2/1.8); 
+
+  Serial.println(motorA.encoderPos);
+
+  if( (encoderTicks - tol) <= encoderAPos && encoderAPos <= (encoderTicks +tol)){
+    motorA.setPWM(0);
+    Serial.print("Reached position");
   }
-  // Reset Button Debounce - Resets encoder position and time
-  if (digitalRead(startPin) == true) {
-    pressedStart = true;
+  else if( encoderAPos <= encoderTicks){
+    motorA.setDir(1);
+    motorA.setPWM(speedA);
+   //Serial.print("Setdir1");
   }
-  while (digitalRead(startPin) == true);	//can comment this out also? for below reason
-  //delay(20); don't need delay: we don't care about debounce, also we don't want to slow down loop
-  if (pressedStart == true) {
-	Serial.print(" \n \n START DATA \n"); 
-	recordFlag = 1;
-  measuredTime = 0; 
-  encoderAPos = 0;
-	timeStart = millis();
-	motorA.setPWM(255);
+  else if( encoderAPos >= encoderTicks){
+    motorA.setDir(2);
+    motorA.setPWM(speedA);
+   //Serial.print("Setdir2");
   }
-  pressedStart = false;
-  
-  if(recordFlag == 1){
-	  measuredTime = millis() - timeStart; 
-	  Serial.print(measuredTime);
-	  Serial.print(",");
-	  Serial.print(encoderAPos,DEC);
-	  Serial.print(" \n ");
-	  
-	  if(measuredTime > timeInterval){
-		  Serial.print(" END DATA \n");
-		  recordFlag = 0; 
-	  }
-	  
+  else{
+    Serial.print("Error: unexpected position reading");
+    motorA.setPWM(0); 
   }
-  
 }
 
 void encoderISRA1()
@@ -138,3 +127,4 @@ void encoderISRA2(){
   motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
 
 }
+
