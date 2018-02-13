@@ -57,16 +57,17 @@ FB1 = [1];
 
 Conversion = 1.8/2*pi/180*1000;
 
-zeta = 1.6;
-w0 = (4.65*zeta-1.3)/0.068;
-Kfinal = 125;
+zeta = 0.82;
+w0 = (4.65*zeta-1.3)/0.300; % overdamped
+w1 = (2.16*zeta+0.6)/0.300;
+Kfinal = 475.5;
 H = tf(Kfinal*w0^2, [1, 2*zeta*w0, w0^2])
+Z = tf(Kfinal*w1^2, [1, 2*zeta*w1, w1^2]);
 
 Mech0ntest = [Kfinal*w0^2];
 Mech0dtest = [1 2*zeta*w0 w0^2];
 
-
-
-%stepplot(H);
-%grid on;
-%grid minor;
+stepplot(H);
+%stepplot(Z);
+grid on;
+grid minor;
