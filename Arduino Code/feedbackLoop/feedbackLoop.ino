@@ -49,16 +49,17 @@ void loop(){
   Serial.println(motorA.encoderPos);
 
   if( (encoderTicks - tol) <= encoderAPos && encoderAPos <= (encoderTicks +tol)){
-    motorA.setPWM(0);
+    //motorA.setPWM(0);
+    motorA.hardStop(); 
     Serial.print("Reached position");
   }
   else if( encoderAPos <= encoderTicks){
-    motorA.setDir(1);
+    motorA.setDir(2);
     motorA.setPWM(speedA);
    //Serial.print("Setdir1");
   }
   else if( encoderAPos >= encoderTicks){
-    motorA.setDir(2);
+    motorA.setDir(1);
     motorA.setPWM(speedA);
    //Serial.print("Setdir2");
   }
