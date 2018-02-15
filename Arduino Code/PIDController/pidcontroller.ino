@@ -18,7 +18,11 @@
 
 //#define positionDeg 90  //degrees to move
 #define tol 2     //tolerance for position
-#define speedA 30   //pwm for motor
+#define speedA 30
+#define PID_UPPER_LIMIT 1000
+#define PID_LOWER_LIMIT -1000
+#define ENCODER_LOWER_LIMTI 0
+#define ENCODER_UPPER_LIMTI 400
 
 volatile signed int encoderAPos = 0;
 volatile signed int positionDeg = 90;
@@ -27,7 +31,7 @@ double Input, Output, Setpoint;
 
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
-PID forwardPID(&Input, &Output, &Setpoint, 0.00317062418277948, 0.0126271392777723, 0.000192626690484756, DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.0537954476805063, 0.000476396049937738, DIRECT);
 
 void setup() {
   Serial.begin(9600);
@@ -39,6 +43,7 @@ void setup() {
 
   forwardPID.SetMode(AUTOMATIC);
 
+  forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   // Set initial motor direction and PWM
   motorA.setPWM(speedA); 
   motorA.setDir(1);
@@ -46,7 +51,7 @@ void setup() {
 }
 
 void loop(){
-
+  int pwm;
   double encoderTicksDesired = positionDeg*(2/1.8); 
   Setpoint = encoderTicksDesired;
   Input = encoderAPos;
@@ -55,30 +60,27 @@ void loop(){
 
   Serial.print(Output);
   Serial.print("  ");
-//  Serial.print(
-  Serial.println(motorA.encoderPos);
-  
-//  //Serial.println(motorA.encoderPos);
-//
-//  if( (encoderTicksDesired - tol) <= encoderAPos && encoderAPos <= (encoderTicksDesired +tol)){
-//    //motorA.setPWM(0);
-//    motorA.hardStop(); 
-//    Serial.print("Reached position");
-//  }
-//  else if( encoderAPos <= encoderTicksDesired){
-//    motorA.setDir(2);
-//    motorA.setPWM(speedA);
-//   //Serial.print("Setdir1");
-//  }
-//  else if( encoderAPos >= encoderTicksDesired){
-//    motorA.setDir(1);
-//    motorA.setPWM(speedA);
-//   //Serial.print("Setdir2");
-//  }
-//  else{
-//    Serial.print("Error: unexpected position reading");
-//    motorA.setPWM(0); 
-//  }
+
+  Serial.print(motorA.encoderPos);
+
+  Serial.print("  ");
+  Serial.println(pwm);
+
+  if ((encoderAPos <= encoderTicksDesired + 2) && (encoderAPos >= encoderTicksDesired - 2)){
+    motorA.hardStop();
+    Serial.print("DONE");
+  }
+  else{
+    if (Output > 0){
+      motorA.setDir(2);
+      pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
+    }
+    else if (Output < 0){
+      motorA.setDir(1);
+      pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
+    }
+    motorA.setPWM(pwm);
+  }
 }
 
 void encoderISRA1()
@@ -108,6 +110,13 @@ void encoderISRA1()
   }
   //Serial.println(encoder0Pos, DEC);
   // use for debugging - remember to comment out
+//  if (encoderAPos == 400) {
+//    encoderAPos = 0;
+//  }
+//  else if (encoderAPos == -1){
+//    encoderAPos = 399;
+//  }
+
   motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
 
 }
@@ -136,7 +145,13 @@ void encoderISRA2(){
       encoderAPos = encoderAPos - 1;          // CCW
     }
   }
-
+//
+//  if (encoderAPos == 400) {
+//    encoderAPos = 0;
+//  }
+//  else if (encoderAPos == -1){
+//    encoderAPos = 399;
+//  }
   motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
 
 }
