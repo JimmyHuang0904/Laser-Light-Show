@@ -15,6 +15,7 @@
 #define dirPinA2 5
 #define encPinA1 2
 #define encPinA2 3
+#define resetPin 6
 
 //#define positionDeg 90  //degrees to move
 #define tol 2     //tolerance for position
@@ -24,6 +25,9 @@
 #define ENCODER_LOWER_LIMTI 0
 #define ENCODER_UPPER_LIMTI 400
 
+void encoderISRA1();  //why do i need to add these???
+void encoderISRA2();
+
 volatile signed int encoderAPos = 0;
 volatile signed int positionDeg = 90;
 
@@ -31,10 +35,13 @@ double Input, Output, Setpoint;
 
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
-PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.0537954476805063, 0.000476396049937738, DIRECT);
+//PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.0537954476805063, 0.000476396049937738, DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, .1, 0 , .15, DIRECT);
 
 void setup() {
   Serial.begin(9600);
+
+  pinMode(resetPin, INPUT); 
 
   pinMode(encPinA1, INPUT);
   pinMode(encPinA2, INPUT);
@@ -45,18 +52,61 @@ void setup() {
 
   forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   // Set initial motor direction and PWM
-  motorA.setPWM(speedA); 
+  //motorA.setPWM(speedA); 
+  motorA.setPWM(0); 
   motorA.setDir(1);
-
+  
 }
 
 void loop(){
   int pwm;
-  double encoderTicksDesired = positionDeg*(2/1.8); 
-  Setpoint = encoderTicksDesired;
+  int resetState = 0;
+  //double encoderTicksDesired = positionDeg*(2/1.8);
+  double encoderTicksDesired = 0;  
+  //Setpoint = encoderTicksDesired;
+  Setpoint = 0; 
   Input = encoderAPos;
 
+  //detect button high
+  resetState = digitalRead(resetPin);
+  if(resetState == HIGH){
+    motorA.hardStop();
+    delay(1000);
+    motorA.setPWM(0);
+    motorA.setDir(1); 
+    Serial.print("Reset Hit");
+    delay(1000);
+    encoderAPos = 0;
+    motorA.encoderPos = 0; 
+    forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0
+    forwardPID.SetOutputLimits(-1.0, 0.0);  // Forces maximum down to 0.0
+    forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);  // Set the limits back to normal
+  }
+
   forwardPID.Compute();
+
+  if ((encoderAPos <= encoderTicksDesired + 2) && (encoderAPos >= encoderTicksDesired - 2)){
+    motorA.hardStop();
+    Serial.print("DONE");
+  }
+  else{
+    if (Output == 0 ){
+      pwm = 0;
+    }
+    else if (Output > 0){
+      motorA.setDir(2);
+      pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 70);
+        //pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
+        //or should this be map(Output, 30, PID_UPPER_LIMIT, 30, 200);
+        //lower lim of output is 30???
+    }
+    else if (Output < 0){
+      motorA.setDir(1);
+      pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 70);
+      //pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
+    }
+    motorA.setPWM(pwm);
+  }
 
   Serial.print(Output);
   Serial.print("  ");
@@ -65,22 +115,6 @@ void loop(){
 
   Serial.print("  ");
   Serial.println(pwm);
-
-  if ((encoderAPos <= encoderTicksDesired + 2) && (encoderAPos >= encoderTicksDesired - 2)){
-    motorA.hardStop();
-    Serial.print("DONE");
-  }
-  else{
-    if (Output > 0){
-      motorA.setDir(2);
-      pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
-    }
-    else if (Output < 0){
-      motorA.setDir(1);
-      pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
-    }
-    motorA.setPWM(pwm);
-  }
 }
 
 void encoderISRA1()
