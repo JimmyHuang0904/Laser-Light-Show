@@ -1,125 +1,134 @@
-/*
-  Measure and output TF data to csv file. 
-  Code that runs basic functions in the Motors class
-  The two motors are refered to as Motor A and Motor B.
-  For each motor, there is an Encoder 1 and Encoder 2. 
-  Motor PWM range: 0 to 255
-*/
+//from http://howtomechatronics.com/tutorials/arduino/arduino-dc-motor-control-tutorial-l298n-pwm-h-bridge/
+//http://playground.arduino.cc/Main/RotaryEncoders#Intro
+//PWM from 0 to 255 for some reason
 
-#include "Arduino.h"
-#include "Motor.h"
+#define enable 9
+#define dir1 4
+#define dir2 5
+#define pushRst 6
+#define pushSpd 5
+#define pushDir 4
+#define encPinA 2
+#define encPinB 3
 
-#define enablePinA 9
-#define dirPinA1 4
-#define dirPinA2 5
-#define encPinA1 2
-#define encPinA2 3
-#define startPin 6
+int encoderA = 0;
+int encoderB = 0;
 
-#define timeInterval 2000	//length of time for sampled data in milliseconds
+int count = 0;
+bool blocked = false;
 
+int rotDirection = 0;
+int pressed = false;
+int pressedSpd = false;
+int pressedRst = false;
 
-volatile signed int encoderAPos = 0;
-int pressedStart = false;
-int timeStart = 0; 
-int recordFlag = 0; 
-unsigned long measuredTime = 0;
+int speed = 0;
+int pwmOutput= 0; 
 
-Motor motorA(enablePinA, dirPinA1, dirPinA2);
+volatile signed int encoder0Pos = 0;
+unsigned long Time = 0;
+unsigned long MeasuredTime = 0;
+unsigned long Offset = 0;
 
 void setup() {
   Serial.begin(9600);
-  //increase buad rate from 9600 to speed up communication?? 
-
-  pinMode(encPinA1, INPUT); 
-  pinMode(encPinA2, INPUT);
-  attachInterrupt(digitalPinToInterrupt(encPinA1), encoderISRA1, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(encPinA2), encoderISRA2, CHANGE);
-
-  // Set initial motor direction and PWM
-  motorA.setPWM(0); 
-  motorA.setDir(1);
   
+  pinMode(encPinA, INPUT); 
+  pinMode(encPinB, INPUT);
+   
+  pinMode(enable, OUTPUT);
+  pinMode(dir1, OUTPUT);
+  pinMode(dir2, OUTPUT);
+  
+  pinMode(pushDir, INPUT);
+  pinMode(pushSpd, INPUT);
+  pinMode(pushRst, INPUT);
+
+   // encoder pin on interrupt 0 (pin 2)
+  attachInterrupt(digitalPinToInterrupt(2), doEncoderA, CHANGE);
+  // encoder pin on interrupt 1 (pin 3)
+  attachInterrupt(digitalPinToInterrupt(3), doEncoderB, CHANGE);
+
+  // Set initial rotation direction
+  digitalWrite(dir1, LOW);
+  digitalWrite(dir2, HIGH);
 }
 
-void loop(){
-  //motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, but that possibly slows ISR. possible change later?
-  if (recordFlag == 0){
-	  motorA.setPWM(0);
+void loop() {
+  encoderA = digitalRead(encPinA);
+  encoderB = digitalRead(encPinB);
+
+  if (MeasuredTime >= 3000){
+    speed = 0;
   }
-  // Reset Button Debounce - Resets encoder position and time
-  if (digitalRead(startPin) == true) {
-    pressedStart = true;
+
+  Time = millis();
+  // Reset Button - Resets encoder position and time
+  if (digitalRead(pushRst) == true) {
+    pressedRst = true;
+    Serial.println("RESET");
   }
-  while (digitalRead(startPin) == true);	//can comment this out also? for below reason
-  //delay(20); don't need delay: we don't care about debounce, also we don't want to slow down loop
-  if (pressedStart == true) {
-	Serial.print(" \n \n START DATA \n"); 
-	recordFlag = 1;
-  measuredTime = 0; 
-  encoderAPos = 0;
-	timeStart = millis();
-	motorA.setPWM(255);
+  while (digitalRead(pushRst) == true);
+  delay(20);
+  if (pressedRst == true) {
+    speed = 20;
+    Offset = Time;
+    encoder0Pos = 0;
   }
-  pressedStart = false;
-  
-  if(recordFlag == 1){
-	  measuredTime = millis() - timeStart; 
-	  Serial.print(measuredTime);
-	  Serial.print(",");
-	  Serial.print(encoderAPos,DEC);
-	  Serial.print(" \n ");
-	  
-	  if(measuredTime > timeInterval){
-		  Serial.print(" END DATA \n");
-		  recordFlag = 0; 
-	  }
-	  
-  }
-  
+  Time = millis();
+  // Time Logic
+  MeasuredTime = Time - Offset;
+
+  Serial.print(MeasuredTime);
+  Serial.print("   ");
+  Serial.println(encoder0Pos, DEC);
+
+  pressedRst = false;
+
+  pwmOutput = map(speed, 0, 20, 0 , 255); // Map the speed value from 0 to 255
+  analogWrite(enable, pwmOutput); // Send PWM signal to L298N Enable pin
+
 }
 
-void encoderISRA1()
-{
-  
+void doEncoderA() {
+
   // look for a low-to-high on channel A
-  if (digitalRead(encPinA1) == HIGH) {
+  if (digitalRead(encPinA) == HIGH) {
 
     // check channel B to see which way encoder is turning
-    if (digitalRead(encPinA2) == LOW) {
-      encoderAPos = encoderAPos + 1;         // CW
+    if (digitalRead(encPinB) == LOW) {
+      encoder0Pos = encoder0Pos + 1;         // CW
     }
     else {
-      encoderAPos = encoderAPos - 1;         // CCW
+      encoder0Pos = encoder0Pos - 1;         // CCW
     }
   }
 
   else   // must be a high-to-low edge on channel A
   {
     // check channel B to see which way encoder is turning
-    if (digitalRead(encPinA2) == HIGH) {
-      encoderAPos = encoderAPos + 1;          // CW
+    if (digitalRead(encPinB) == HIGH) {
+      encoder0Pos = encoder0Pos + 1;          // CW
     }
     else {
-      encoderAPos = encoderAPos - 1;          // CCW
+      encoder0Pos = encoder0Pos - 1;          // CCW
     }
   }
   //Serial.println(encoder0Pos, DEC);
   // use for debugging - remember to comment out
-  motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
-
 }
 
-void encoderISRA2(){
+void doEncoderB() {
+  
   // look for a low-to-high on channel B
-  if (digitalRead(encPinA2) == HIGH) {
+  if (digitalRead(encPinB) == HIGH) {
 
     // check channel A to see which way encoder is turning
-    if (digitalRead(encPinA1) == HIGH) {
-      encoderAPos = encoderAPos + 1;         // CW
+    if (digitalRead(encPinA) == HIGH) {
+      encoder0Pos = encoder0Pos + 1;         // CW
     }
     else {
-      encoderAPos = encoderAPos - 1;         // CCW
+      encoder0Pos = encoder0Pos - 1;         // CCW
     }
   }
 
@@ -127,14 +136,11 @@ void encoderISRA2(){
 
   else {
     // check channel B to see which way encoder is turning
-    if (digitalRead(encPinA1) == LOW) {
-      encoderAPos = encoderAPos + 1;          // CW
+    if (digitalRead(encPinA) == LOW) {
+      encoder0Pos = encoder0Pos + 1;          // CW
     }
     else {
-      encoderAPos = encoderAPos - 1;          // CCW
+      encoder0Pos = encoder0Pos - 1;          // CCW
     }
   }
-
-  motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
-
 }
