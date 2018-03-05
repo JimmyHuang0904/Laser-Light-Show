@@ -36,13 +36,16 @@ double encoderTicksDesired = 0;
 int stopFlag = 0;
 int dir1Flag = 0;
 int dir2Flag = 0; 
+double timer = 0;
+double startTime = 0;
+double currentTime = 0; 
 
 double Input, Output, Setpoint;
 
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
 //PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.0537954476805063, 0.000476396049937738, DIRECT);
-PID forwardPID(&Input, &Output, &Setpoint, .01, 0.0538, .000476, DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.00537954476805063, 0.000476396049937738, DIRECT);
 
 void setup() {
   Serial.begin(9600);
@@ -61,19 +64,49 @@ void setup() {
   //motorA.setPWM(speedA); 
   motorA.setPWM(0); 
   motorA.setDir(1);
-  
+
+  encoderTicksDesired = 100;
+  Setpoint = 90; 
+  startTime = 0; 
 }
 
 void loop(){
-  
-  resetState = 0;
+
+  timer = millis();
+  currentTime = timer - startTime; 
+  if( currentTime > 1000){
+    startTime = millis(); 
+    encoderTicksDesired += 50;
+    Setpoint +=45; 
+
+    forwardPID.SetMode(MANUAL);
+    forwardPID.SetMode(AUTOMATIC);
+    forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0
+    forwardPID.SetOutputLimits(-1.0, 0.0);  // Forces maximum down to 0.0
+    forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);  // Set the limits back to normal
+    
+    motorA.setPWM(0); 
+    motorA.setDir(1);
+    Output = 0; 
+    Input = (encoderAPos*2/1.8);
+
+    int stopFlag = 0;
+    int dir1Flag = 0;
+    int dir2Flag = 0; 
+
+    Serial.print("next position \n"); 
+    Serial.print(encoderAPos); 
+  }
   //double encoderTicksDesired = positionDeg*(2/1.8);
-  encoderTicksDesired = 100;  
+  //encoderTicksDesired = 100;  
   //Setpoint = encoderTicksDesired;
-  Setpoint = 90; 
-  Input = encoderAPos;
+  //Setpoint = 90; 
+  
+  Input = encoderAPos*(2/1.8);
 
   /*
+  resetState = 0;
+  
   //detect button high
   resetState = digitalRead(resetPin);
   if(resetState == HIGH){
