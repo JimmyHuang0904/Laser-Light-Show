@@ -1,0 +1,139 @@
+/*
+  Measure and output TF data to csv file. 
+  Code that runs basic functions in the Motors class
+  The two motors are refered to as Motor A and Motor B.
+  For each motor, there is an Encoder 1 and Encoder 2. 
+  Motor PWM range: 0 to 255
+*/
+
+#include "Arduino.h"
+#include "Motor.h"
+
+#define enablePinA0
+#define dirPinA1 4
+#define dirPinA2 5
+#define encPinA1 2
+#define encPinA2 3
+#define startPin 6
+
+#define timeInterval = 5000	//length of time for sampled data in milliseconds
+
+
+volatile signed int encoderAPos = 0;
+int pressedStart = false;
+int timeStart = 0; 
+int recordFlag = 0; 
+unsigned long measuredTime = 0;
+
+Motor motorA(enablePinA, dirPinA1, dirPinA2);
+
+void setup() {
+  Serial.begin(9600);
+  //increase buad rate from 9600 to speed up communication?? 
+
+  pinMode(encPinA1, INPUT); 
+  pinMode(encPinA2, INPUT);
+  attachInterrupt(digitalPinToInterrupt(encPinA1), encoderISRA1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encPinA2), encoderISRA2, CHANGE);
+
+  // Set initial motor direction and PWM
+  motorA.setPWM(0); 
+  motorA.setDir(1);
+  
+}
+
+void loop(){
+  //motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, but that possibly slows ISR. possible change later?
+  if recordFlag = 0{
+	  motorA.setPWM(0);
+  }
+  // Reset Button Debounce - Resets encoder position and time
+  if (digitalRead(startPin) == true) {
+    pressedStart = true;
+  }
+  while (digitalRead(startPin) == true);	//can comment this out also? for below reason
+  //delay(20); don't need delay: we don't care about debounce, also we don't want to slow down loop
+  if (pressedStart == true) {
+	serialPrint(" \n \n START DATA \n"); 
+	recordFlag = 1;
+    encoderAPos = 0;
+	timeStart = millis();
+	motorA.setPWM(255);
+  }
+  pressedStart = false;
+  
+  if(recordFlag == 1){
+	  measuredTime = millis() - timeStart; 
+	  Serial.print(measuredTime);
+	  Serial.print(",");
+	  Serial.print(encoderApos,DEC);
+	  Serial.print(" \n ")
+	  
+	  if(measuredTime > timeInterval){
+		  Serial.Print(" END DATA \n");
+		  recordFlag = 0; 
+	  }
+	  
+  }
+  
+}
+
+void encoderISRA1()
+{
+  
+  // look for a low-to-high on channel A
+  if (digitalRead(encPinA1) == HIGH) {
+
+    // check channel B to see which way encoder is turning
+    if (digitalRead(encPinA2) == LOW) {
+      encoderAPos = encoderAPos + 1;         // CW
+    }
+    else {
+      encoderAPos = encoderAPos - 1;         // CCW
+    }
+  }
+
+  else   // must be a high-to-low edge on channel A
+  {
+    // check channel B to see which way encoder is turning
+    if (digitalRead(encPinA2) == HIGH) {
+      encoderAPos = encoderAPos + 1;          // CW
+    }
+    else {
+      encoderAPos = encoderAPos - 1;          // CCW
+    }
+  }
+  //Serial.println(encoder0Pos, DEC);
+  // use for debugging - remember to comment out
+  motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
+
+}
+
+void encoderISRA2(){
+  // look for a low-to-high on channel B
+  if (digitalRead(encPinA2) == HIGH) {
+
+    // check channel A to see which way encoder is turning
+    if (digitalRead(encPinA1) == HIGH) {
+      encoderAPos = encoderAPos + 1;         // CW
+    }
+    else {
+      encoderAPos = encoderAPos - 1;         // CCW
+    }
+  }
+
+  // Look for a high-to-low on channel B
+
+  else {
+    // check channel B to see which way encoder is turning
+    if (digitalRead(encPinA1) == LOW) {
+      encoderAPos = encoderAPos + 1;          // CW
+    }
+    else {
+      encoderAPos = encoderAPos - 1;          // CCW
+    }
+  }
+
+  motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
+
+}

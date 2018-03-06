@@ -66,7 +66,7 @@ Kfinal = 400;
 w0 = (2.16*zeta+0.6)/(0.104);
 
 H = tf(Kfinal*w0^2, [1, 2*zeta*w0, w0^2])
-%Z = tf(Kfinal*w1^2, [1, 2*zeta*w1, w1^2]);
+Z = tf(Kfinal*w1^2, [1, 2*zeta*w1, w1^2]);
 
 Mech0ntest = [Kfinal*w0^2];
 Mech0dtest = [1 2*zeta*w0 w0^2];
