@@ -61,15 +61,16 @@ Conversion = 1.8/2*pi/180*1000;
 %w0 = (4.65*zeta-1.3)/0.300; % overdamped
 %w1 = (2.16*zeta+0.6)/0.300;
 %Kfinal = 500;
-zeta = 0.41;
-Kfinal = 400;
-w0 = (2.16*zeta+0.6)/(0.104);
+zeta = 0.362129654774;
+Kfinal = 305;
+%wn = 44.9379419843;
+wn = 28;
+%w0 = (2.16*zeta+0.6)/(0.104);
 
-H = tf(Kfinal*w0^2, [1, 2*zeta*w0, w0^2])
-Z = tf(Kfinal*w1^2, [1, 2*zeta*w1, w1^2]);
+H = tf(Kfinal*wn^2, [1, 2*zeta*wn, wn^2])
 
-Mech0ntest = [Kfinal*w0^2];
-Mech0dtest = [1 2*zeta*w0 w0^2];
+Mech0ntest = [Kfinal*wn^2];
+Mech0dtest = [1 2*zeta*wn wn^2];
 
 
 
