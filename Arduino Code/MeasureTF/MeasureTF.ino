@@ -22,7 +22,7 @@ int pressed = false;
 int pressedSpd = false;
 int pressedRst = false;
 
-int speed = 2; 
+int speed = 20; 
 int pwmOutput= 0; 
 
 volatile signed int encoder0Pos = 0;
