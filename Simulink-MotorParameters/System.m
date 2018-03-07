@@ -48,12 +48,12 @@ Elec0n  = [1];               % Numerator
 Elec0d  = [.00105 2.25];               % Denominator
 
 % Torque Const & Back EMF
-TConst0  = 0.0193;
-BackEMF0 = 0.001545;
+TConst0  = 0.001574542;
+BackEMF0 = 0.09331;
 
 % Mechanical Motor Dynamics
 Mech0n  = [1];               % Numerator
-Mech0d  = [0.000001283 0.00005157];               % Denominator
+Mech0d  = [0.0000002059 0.0000009585];               % Denominator
 JntSat0 =  Big;
 
 % Sensor Dynamics
@@ -95,5 +95,5 @@ StFric1 = 0;
 % ==================
 % TRANSFER FUNCTIONS
 % ==================
-% Compute transfer functions from above values and perform system analysis
+
 % You may prefer to put this section in a separate .m file

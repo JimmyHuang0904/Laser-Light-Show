@@ -44,7 +44,7 @@ double Input, Output, Setpoint;
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
 //PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.0537954476805063, 0.000476396049937738, DIRECT);
-PID forwardPID(&Input, &Output, &Setpoint, 0.2, 0.00001, 0.0004,  DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, 0.2, 0.0000, 0.0004,  DIRECT);
 //PID forwardPID(&Input, &Output, &Setpoint, 0.3, 0, 0, DIRECT);
 
 void setup() {

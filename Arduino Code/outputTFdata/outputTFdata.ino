@@ -26,12 +26,11 @@ int speed = 0;
 int pwmOutput= 0; 
 
 volatile signed int encoder0Pos = 0;
-unsigned long Time = 0;
-unsigned long MeasuredTime = 0;
-unsigned long Offset = 0;
+volatile double Time = 0; 
+volatile signed int Pos = 0; 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(57600);
   
   pinMode(encPinA, INPUT); 
   pinMode(encPinB, INPUT);
@@ -52,41 +51,18 @@ void setup() {
   // Set initial rotation direction
   digitalWrite(dir1, LOW);
   digitalWrite(dir2, HIGH);
+
+  analogWrite(enable, 255); // Send PWM signal to L298N Enable pin
 }
 
 void loop() {
-  encoderA = digitalRead(encPinA);
-  encoderB = digitalRead(encPinB);
 
-  if (MeasuredTime >= 3000){
-    speed = 0;
-  }
-
-  Time = millis();
-  // Reset Button - Resets encoder position and time
-  if (digitalRead(pushRst) == true) {
-    pressedRst = true;
-    Serial.println("RESET");
-  }
-  while (digitalRead(pushRst) == true);
-  delay(20);
-  if (pressedRst == true) {
-    speed = 20;
-    Offset = Time;
-    encoder0Pos = 0;
-  }
-  Time = millis();
-  // Time Logic
-  MeasuredTime = Time - Offset;
-
-  Serial.print(MeasuredTime);
+  Time = micros();
+  Pos = encoder0Pos; 
+  Serial.print(Time);
   Serial.print("   ");
-  Serial.println(encoder0Pos, DEC);
+  Serial.println(Pos, DEC);
 
-  pressedRst = false;
-
-  pwmOutput = map(speed, 0, 20, 0 , 255); // Map the speed value from 0 to 255
-  analogWrite(enable, pwmOutput); // Send PWM signal to L298N Enable pin
 
 }
 

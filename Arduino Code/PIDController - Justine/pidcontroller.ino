@@ -10,7 +10,7 @@
 #include "Motor.h"
 #include <PID_v1.h>
 
-#define enablePinA 9
+#define enablePinA	9
 #define dirPinA1 4
 #define dirPinA2 5
 #define encPinA1 2
@@ -44,11 +44,11 @@ double Input, Output, Setpoint;
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
 //PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.0537954476805063, 0.000476396049937738, DIRECT);
-PID forwardPID(&Input, &Output, &Setpoint, 0.2, 0.00001, 0.0004,  DIRECT);
-//PID forwardPID(&Input, &Output, &Setpoint, 0.3, 0, 0, DIRECT);
+//PID forwardPID(&Input, &Output, &Setpoint, 0, 0, 1, DIRECT);
+/PID forwardPID(&Input, &Output, &Setpoint, 0.3, 0, 0, DIRECT);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   pinMode(resetPin, INPUT); 
 
@@ -58,7 +58,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encPinA2), encoderISRA2, CHANGE);
 
   forwardPID.SetMode(AUTOMATIC);
-  forwardPID.SetSampleTime(1); 
+
   forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   // Set initial motor direction and PWM
   //motorA.setPWM(speedA); 
@@ -103,18 +103,16 @@ void loop(){
 
   }*/
   
-  /*if (Output == 0){
+  if (Output == 0){
     if(stopFlag == 0){
-      //motorA.hardStop();
+      motorA.hardStop();
       stopFlag = 1;
       dir1Flag = 0;
       dir2Flag = 0; 
     }
     pwm = 0; 
   }
-  */
-  //else if (Output > 0){
-  if (Output > 0){
+  else if (Output > 0){
     if(dir2Flag == 0){
       motorA.setDir(2);
       dir2Flag=1;
@@ -123,7 +121,7 @@ void loop(){
       
     }
     pwm = Output;
-    pwm = map(Output, 0, PID_UPPER_LIMIT, 20, 200);
+    //pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 150);
       //pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
       //or should this be map(Output, 30, PID_UPPER_LIMIT, 20, 200);
       //lower lim of output is 30???
@@ -136,16 +134,20 @@ void loop(){
       stopFlag=0; 
     }
     pwm = -1*Output; 
-    pwm = map(Output, 0, PID_LOWER_LIMIT, 20, 200);
+    //pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 150);
     //pwm = map(Output, 0, PID_LOWER_LIMIT, 20, 100);
   }
   motorA.setPWM(pwm);
 
- // Serial.println(encoderAPos, DEC);
+/*
+  Serial.print(Output);
+  Serial.print("  ");
 
-  //Serial.print("  ");
-  //Serial.println(pwm);
-  
+  Serial.print(motorA.encoderPos);
+
+  Serial.print("  ");
+  Serial.println(pwm);
+  */
 }
 
 void encoderISRA1()
@@ -182,7 +184,7 @@ void encoderISRA1()
 //    encoderAPos = 399;
 //  }
 
-  //motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
+  motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
 
 }
 
