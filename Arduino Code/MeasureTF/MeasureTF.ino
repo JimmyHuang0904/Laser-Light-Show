@@ -3,8 +3,8 @@
 //PWM from 0 to 255 for some reason
 
 #define enable 9
-#define dir1 7
-#define dir2 1
+#define dir1 4
+#define dir2 5
 #define pushRst 6
 #define pushSpd 5
 #define pushDir 4
@@ -61,7 +61,7 @@ void loop() {
   // Time Logic
   Time = millis();
   MeasuredTime = Time - Offset;
-  Serial.print(encoder0Pos, DEC);
+  Serial.print(encoder0Pos*1.8/2, DEC);
   Serial.print("   ");
   Serial.println(MeasuredTime);
 
