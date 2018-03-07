@@ -15,26 +15,36 @@
 #define dirPinA2 5
 #define encPinA1 2
 #define encPinA2 3
+#define resetPin 6
 
-//#define positionDeg 90  //degrees to move
-#define tol 2     //tolerance for position
+//#define positionDeg 90  // Degrees to move
+#define tol 2     // Tolerance for position
 #define speedA 30
-#define PID_UPPER_LIMIT 1000
-#define PID_LOWER_LIMIT -1000
-#define ENCODER_LOWER_LIMTI 0
-#define ENCODER_UPPER_LIMTI 400
+#define PID_UPPER_LIMIT 255
+#define PID_LOWER_LIMIT 0
+//#define ENCODER_LOWER_LIMTI 255
+//#define ENCODER_UPPER_LIMTI 255
+
+void encoderISRA1();  // Why do i need to add these???
+void encoderISRA2();
 
 volatile signed int encoderAPos = 0;
 volatile signed int positionDeg = 90;
 
-double Input, Output, Setpoint;
+double Input, Output;
+double Setpoint = 200;
 
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
-PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.0537954476805063, 0.000476396049937738, DIRECT);
+//PID forwardPID(&Input, &Output, &Setpoint, 0.0293064240007801, 0.320652760996062, 0.000504972877460821, DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, 0.0377139597446175, 0.0885241838381296, 0.00073000882783854, DIRECT);
+//0.2, 0.00001, 0.0004 
+
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+
+  pinMode(resetPin, INPUT);
 
   pinMode(encPinA1, INPUT);
   pinMode(encPinA2, INPUT);
@@ -42,45 +52,42 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encPinA2), encoderISRA2, CHANGE);
 
   forwardPID.SetMode(AUTOMATIC);
+  forwardPID.SetSampleTime(2);
+  // ki = ki * sampletime /1000;
+  // kd = kd / sampletime /1000;
 
   forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   // Set initial motor direction and PWM
-  motorA.setPWM(speedA); 
-  motorA.setDir(1);
+  //motorA.setPWM(speedA); 
+  motorA.setPWM(0);
+  //motorA.setDir(1);
 
 }
 
+// Dir(1) is CCW decrease ticks, Dir(2) is CW incr ticks
+
 void loop(){
   int pwm;
-  double encoderTicksDesired = positionDeg*(2/1.8); 
-  Setpoint = encoderTicksDesired;
   Input = encoderAPos;
 
   forwardPID.Compute();
 
+//  if (encoderAPos < Setpoint){
+//    motorA.setDir(2);
+////    motorA.setPWM(Output);
+//  }
+//  else {//if (Output < 0){
+//    motorA.setDir(1);
+////    motorA.setPWM(-1*Output);
+//  }
+  motorA.setPWM(Output);
   Serial.print(Output);
   Serial.print("  ");
 
-  Serial.print(motorA.encoderPos);
-
-  Serial.print("  ");
-  Serial.println(pwm);
-
-  if ((encoderAPos <= encoderTicksDesired + 2) && (encoderAPos >= encoderTicksDesired - 2)){
-    motorA.hardStop();
-    Serial.print("DONE");
-  }
-  else{
-    if (Output > 0){
-      motorA.setDir(2);
-      pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
-    }
-    else if (Output < 0){
-      motorA.setDir(1);
-      pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
-    }
-    motorA.setPWM(pwm);
-  }
+  Serial.println(motorA.encoderPos);
+//
+//  Serial.print("  ");
+//  Serial.println(pwm);
 }
 
 void encoderISRA1()
@@ -108,13 +115,11 @@ void encoderISRA1()
       encoderAPos = encoderAPos - 1;          // CCW
     }
   }
-  //Serial.println(encoder0Pos, DEC);
-  // use for debugging - remember to comment out
-//  if (encoderAPos == 400) {
-//    encoderAPos = 0;
-//  }
-//  else if (encoderAPos == -1){
-//    encoderAPos = 399;
+
+//  if (encoderAPos > 399) {
+//    encoderAPos = encoderAPos - 400;
+//  } else if (encoderAPos < 0) {
+//    encoderAPos = encoderAPos + 400;
 //  }
 
   motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
@@ -145,13 +150,13 @@ void encoderISRA2(){
       encoderAPos = encoderAPos - 1;          // CCW
     }
   }
-//
-//  if (encoderAPos == 400) {
-//    encoderAPos = 0;
+
+// if (encoderAPos > 399) {
+//    encoderAPos = encoderAPos - 400;
+//  } else if (encoderAPos < 0) {
+//    encoderAPos = encoderAPos + 400;
 //  }
-//  else if (encoderAPos == -1){
-//    encoderAPos = 399;
-//  }
+
   motorA.encoderPos = encoderAPos; //update motor object inside ISR for now, possible change later?
 
 }
