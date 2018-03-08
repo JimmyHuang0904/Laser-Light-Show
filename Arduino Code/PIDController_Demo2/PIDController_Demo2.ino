@@ -20,8 +20,8 @@
 //#define positionDeg 90  //degrees to move
 #define tol 2     //tolerance for position
 #define speedA 30
-#define PID_UPPER_LIMIT 150
-#define PID_LOWER_LIMIT -150
+#define PID_UPPER_LIMIT 255
+#define PID_LOWER_LIMIT -255
 #define ENCODER_LOWER_LIMTI 0
 #define ENCODER_UPPER_LIMTI 400
 
@@ -103,7 +103,7 @@ void loop(){
 
   }*/
   
-  /*if (Output == 0){
+  if (Output == 0){
     if(stopFlag == 0){
       //motorA.hardStop();
       stopFlag = 1;
@@ -112,7 +112,7 @@ void loop(){
     }
     pwm = 0; 
   }
-  */
+  
   //else if (Output > 0){
   if (Output > 0){
     if(dir2Flag == 0){
@@ -123,7 +123,7 @@ void loop(){
       
     }
     pwm = Output;
-    pwm = map(Output, 0, PID_UPPER_LIMIT, 20, 200);
+    pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
       //pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
       //or should this be map(Output, 30, PID_UPPER_LIMIT, 20, 200);
       //lower lim of output is 30???
@@ -136,7 +136,7 @@ void loop(){
       stopFlag=0; 
     }
     pwm = -1*Output; 
-    pwm = map(Output, 0, PID_LOWER_LIMIT, 20, 200);
+    pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
     //pwm = map(Output, 0, PID_LOWER_LIMIT, 20, 100);
   }
   motorA.setPWM(pwm);
