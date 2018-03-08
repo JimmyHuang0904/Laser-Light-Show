@@ -16,49 +16,32 @@
 #define encPinA1 3
 #define encPinA2 2
 
-#define resetPin 6
-
-/*
-#define enablePinA 9
-#define dirPinA1 21
-#define dirPinA2 20
-#define encPinA1 50
-#define encPinA2 51
-*/
-//#define positionDeg 90  //degrees to move
-#define tol 2     //tolerance for position
-#define speedA 30
 #define PID_UPPER_LIMIT 255
 #define PID_LOWER_LIMIT -255
-#define ENCODER_LOWER_LIMTI 0
-#define ENCODER_UPPER_LIMTI 400
 
 void encoderISRA1();  //why do i need to add these???
 void encoderISRA2();
 
 volatile signed int encoderAPos = 0;
-volatile signed int positionDeg = 90;
 int pwm =0; 
-int resetState = 0;
-double encoderTicksDesired = 0;
 int stopFlag = 0;
 int dir1Flag = 0;
 int dir2Flag = 0; 
+unsigned long currentTime = 0;
+unsigned long startTime = 0;
+unsigned long timer =0; 
 
-//double 
-
-double Input, Output, Setpoint;
+double Setpoint;
+double Input, Output;
 
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
 //PID forwardPID(&Input, &Output, &Setpoint, 0.0101513210748192, 0.0537954476805063, 0.000476396049937738, DIRECT);
-PID forwardPID(&Input, &Output, &Setpoint, 0.2, 0.0000, 0.0004,  DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, 0.2, 0.0000, 0.004,  DIRECT);
 //PID forwardPID(&Input, &Output, &Setpoint, 0.3, 0, 0, DIRECT);
 
 void setup() {
   Serial.begin(115200);
-
-  pinMode(resetPin, INPUT); 
 
   pinMode(encPinA1, INPUT);
   pinMode(encPinA2, INPUT);
@@ -66,51 +49,43 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encPinA2), encoderISRA2, CHANGE);
 
   forwardPID.SetMode(AUTOMATIC);
-  forwardPID.SetSampleTime(1); 
+  forwardPID.SetSampleTime(3); 
   forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   // Set initial motor direction and PWM
   //motorA.setPWM(speedA); 
   motorA.setPWM(0); 
   motorA.setDir(1);
+
+  encoderTicksDesired = 50;  
+  Setpoint = 50; 
+  Input = encoderAPos;
   
 }
 
 void loop(){
-  
-  resetState = 0;
-  //double encoderTicksDesired = positionDeg*(2/1.8);
-  encoderTicksDesired = 100;  
-  //Setpoint = encoderTicksDesired;
-  Setpoint = 100; 
-  Input = encoderAPos;
+  timer = millis();
+  currentTime = timer - startTime; 
+  if( currentTime > 250){
+    startTime = millis(); 
 
-  /*
-  //detect button high
-  resetState = digitalRead(resetPin);
-  if(resetState == HIGH){
-    motorA.hardStop();
-    delay(1000);
-    motorA.setPWM(0);
-    motorA.setDir(1); 
-    Serial.print("Reset Hit");
-    delay(1000);
-    encoderAPos = 0;
-    motorA.encoderPos = 0; 
     forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0
     forwardPID.SetOutputLimits(-1.0, 0.0);  // Forces maximum down to 0.0
     forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);  // Set the limits back to normal
-    pwm = 0; 
-  }
-  */
+    forwardPID.SetMode(MANUAL);
+    forwardPID.SetMode(AUTOMATIC);
+  
+    int stopFlag = 0;
+    int dir1Flag = 0;
+    int dir2Flag = 0; 
 
+    encoderTicksDesired += 50;
+    Setpoint +=50; 
+  }
+
+
+  Input = encoderAPos;
   forwardPID.Compute();
 
-  /*if (motorA.encoderPos >= (encoderTicksDesired -1) && motorA.encoderPos <= (encoderTicksDesired +1) ){
-    motorA.hardStop();    //note: setting hardstop will reduce instablility/oscilations, but then can only go to setpoint once before resetting
-    //Output = 0; 
-
-  }*/
-  
   if (Output == 0){
     if(stopFlag == 0){
       //motorA.hardStop();

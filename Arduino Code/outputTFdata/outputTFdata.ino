@@ -2,14 +2,20 @@
 //http://playground.arduino.cc/Main/RotaryEncoders#Intro
 //PWM from 0 to 255 for some reason
 
-#define enable 9
-#define dir1 4
+//#define enable 9
+//#define dir1 4
 #define dir2 5
 #define pushRst 6
-#define pushSpd 5
-#define pushDir 4
-#define encPinA 2
-#define encPinB 3
+//#define pushSpd 5
+//#define pushDir 4
+//#define encPinA 2
+//#define encPinB 3
+
+#define enablePinA 8
+#define dirPinA1 11
+#define dirPinA2 10
+#define encPinA1 3
+#define encPinA2 2
 
 int encoderA = 0;
 int encoderB = 0;
