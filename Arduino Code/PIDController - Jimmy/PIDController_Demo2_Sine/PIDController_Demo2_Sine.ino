@@ -15,50 +15,37 @@
 #define dirPinA2 10
 #define encPinA1 3
 #define encPinA2 2
-<<<<<<< Updated upstream
 
-#define resetPin 6
-=======
->>>>>>> Stashed changes
-
-/*
-#define enablePinA 9
-#define dirPinA1 21
-#define dirPinA2 20
-#define encPinA1 50
-#define encPinA2 51
-*/
-//#define positionDeg 90  //degrees to move
-#define tol 2     //tolerance for position
-#define speedA 30
 #define PID_UPPER_LIMIT 255
 #define PID_LOWER_LIMIT -255
-#define ENCODER_LOWER_LIMTI 0
-#define ENCODER_UPPER_LIMTI 400
 
 void encoderISRA1();  //why do i need to add these???
 void encoderISRA2();
 
 volatile signed int encoderAPos = 0;
-volatile signed int positionDeg = 90;
+volatile double Time = 0;
+volatile signed int Pos = 0;
+
+unsigned long currentTime = 0;
+unsigned long startTime = 0;
+unsigned long timer =0; 
+
 int pwm =0; 
 int resetState = 0;
-double encoderTicksDesired = 0;
 int stopFlag = 0;
 int dir1Flag = 0;
 int dir2Flag = 0; 
-
-//double 
+int switchFlag = 0;
 
 double Input, Output, Setpoint;
 
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
 PID forwardPID(&Input, &Output, &Setpoint, 0.2, 0.0000, 0.007,  DIRECT);
-//PID forwardPID(&Input, &Output, &Setpoint, 0.3, 0, 0, DIRECT);
+//PID forwardPID(&Input, &Output, &Setpoint, 0.0268, 0, 0.0011, DIRECT);  // SIMULINK 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(2000000);
 
   pinMode(encPinA1, INPUT);
   pinMode(encPinA2, INPUT);
@@ -69,26 +56,43 @@ void setup() {
   forwardPID.SetSampleTime(2); 
   forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   // Set initial motor direction and PWM
-  //motorA.setPWM(speedA); 
-  motorA.setPWM(0); 
+  Setpoint = 0;
   motorA.setDir(1);
   
 }
 
 void loop(){
+  timer = millis();
+  currentTime = timer - startTime;
+  if( currentTime > 100){
+    startTime = millis(); 
+
+    forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0
+    forwardPID.SetOutputLimits(-1.0, 0.0);  // Forces maximum down to 0.0
+    forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);  // Set the limits back to normal
+    forwardPID.SetMode(MANUAL);
+    forwardPID.SetMode(AUTOMATIC);
   
-  //Setpoint = encoderTicksDesired;
-  Setpoint = 100; 
+    stopFlag = 0;
+    dir1Flag = 0;
+    dir2Flag = 0;
+
+    Setpoint = sin(timer)*50;
+    Serial.println(encoderAPos, DEC);
+//    Serial.println(sin(timer)*25);
+//    if ( switchFlag == 0 ){
+//      Setpoint -= 50;
+//      switchFlag = 1;
+//    }
+//    else {
+//      Setpoint += 50;
+//      switchFlag = 0;
+//    }
+  }
+  
   Input = encoderAPos;
 
-//  Serial.println("hi");
-//  
-//  Serial.println("bye");
-//  
-//  Serial.println("hi");
-//  
-//  Serial.println("hi");
-//  Serial.println("hi");
+
 
   forwardPID.Compute();
   
@@ -124,6 +128,12 @@ void loop(){
     pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
   }
   motorA.setPWM(pwm);
+//
+//  Time = micros();
+//  Pos = encoderAPos;
+//  Serial.print(Time);
+//  Serial.print("  ");
+//  Serial.println(Pos);
 
 }
 

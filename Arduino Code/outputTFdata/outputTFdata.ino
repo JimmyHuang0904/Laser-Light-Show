@@ -2,6 +2,7 @@
 //http://playground.arduino.cc/Main/RotaryEncoders#Intro
 //PWM from 0 to 255 for some reason
 
+<<<<<<< Updated upstream
 //#define enable 9
 //#define dir1 4
 #define dir2 5
@@ -16,6 +17,16 @@
 #define dirPinA2 10
 #define encPinA1 3
 #define encPinA2 2
+=======
+#define enable 8
+#define dir1 11
+#define dir2 10
+#define pushRst 6
+#define pushSpd 5
+#define pushDir 4
+#define encPinA 3
+#define encPinB 2
+>>>>>>> Stashed changes
 
 int encoderA = 0;
 int encoderB = 0;
@@ -36,7 +47,7 @@ volatile double Time = 0;
 volatile signed int Pos = 0; 
 
 void setup() {
-  Serial.begin(57600);
+  Serial.begin(2000000);
   
   pinMode(encPinA, INPUT); 
   pinMode(encPinB, INPUT);
@@ -55,8 +66,8 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(3), doEncoderB, CHANGE);
 
   // Set initial rotation direction
-  digitalWrite(dir1, LOW);
-  digitalWrite(dir2, HIGH);
+  digitalWrite(dir2, LOW);
+  digitalWrite(dir1, HIGH);
 
   analogWrite(enable, 255); // Send PWM signal to L298N Enable pin
 }
@@ -68,7 +79,6 @@ void loop() {
   Serial.print(Time);
   Serial.print("   ");
   Serial.println(Pos, DEC);
-
 
 }
 

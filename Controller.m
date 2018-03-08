@@ -64,34 +64,44 @@ FB1 = [1];
 %wn = 28;
 %w0 = (2.16*zeta+0.6)/(0.104);
 
-%I = tf(Kfinal*wn^2, [1, 2*zeta*wn, wn^2, 0])
+%Kd = 1;
+%Kp = 20.28;
+%Ki = 784;
 
-Mech0ntest = [Kfinal*wn^2];
-Mech0dtest = [1 2*zeta*wn wn^2];
-
-Kd = 1;
-Kp = 20.28;
-Ki = 784;
-
-PID = tf([Kd, Kp/Kd, Ki/Kd], [1, 0]);
-PID = tf([1 32 256], [1, 0]);
-PID = I * PID;
+%PID = tf([Kd, Kp/Kd, Ki/Kd], [1, 0]);
+%PID = tf([1 32 256], [1, 0]);
+%PID = I * PID;
 
 %rlocus(PID)
-Kfinal = 325;
-Mp = (500-325)/325;
+Kfinal = 580;
+Mp = (600-580)/580;
 Zeta = sqrt((log(Mp))^2/((log(Mp))^2+pi^2));
 wn = (2*pi/0.4)/sqrt(1-Zeta^2);
 
-Zeta = 0.3;
-wn = 100;
+%Zeta = 0.73;
+wn = 35;
 
-H = tf(Kfinal*wn^2, [1, 2*Zeta*wn, wn^2])
+H = tf(Kfinal*wn^2, [1, 2*Zeta*wn, wn^2]);
+I = tf(Kfinal*wn^2, [1, 2*Zeta*wn, wn^2, 0]);
+
+%PID stuff
+Ku = 0.000918;
+Kd = 1*Ku;
+Ki = 0;
+Kp = 24/Kd;
+%rlocus(I)
+PID = tf([Kd, Kp/Kd, Ki/Kd], [1, 0]);
+TF_full = tf(1, I * PID + 1);
+
+
+Mech0ntest = [Kfinal*wn^2];
+Mech0dtest = [1 2*Zeta*wn wn^2];
+
 clf;
 hold on
 stepplot(H)
-plot(T,V)
+plot(Time,Velocity)
 hold off
-%stepplot(Z);
+
 %grid on;
 %grid minor;
