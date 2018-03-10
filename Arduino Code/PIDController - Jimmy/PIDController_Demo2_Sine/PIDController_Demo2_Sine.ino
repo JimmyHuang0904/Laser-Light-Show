@@ -64,7 +64,7 @@ void setup() {
 void loop(){
   timer = millis();
   currentTime = timer - startTime;
-  if( currentTime > 100){
+  if( currentTime > 150){
     startTime = millis(); 
 
     forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0

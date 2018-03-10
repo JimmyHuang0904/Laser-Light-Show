@@ -78,7 +78,6 @@ Mp = (600-580)/580;
 Zeta = sqrt((log(Mp))^2/((log(Mp))^2+pi^2));
 wn = (2*pi/0.4)/sqrt(1-Zeta^2);
 
-%Zeta = 0.73;
 wn = 35;
 
 H = tf(Kfinal*wn^2, [1, 2*Zeta*wn, wn^2]);
