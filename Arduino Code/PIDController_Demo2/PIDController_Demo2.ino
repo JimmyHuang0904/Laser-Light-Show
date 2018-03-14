@@ -45,12 +45,13 @@ int dir2Flag = 0;
 
 
 
-double Input, Output, Setpoint;
+double Input, Output;
+double Setpoint = 100; 
 
 Motor motorA(enablePinA, dirPinA1, dirPinA2);
 
-PID forwardPID(&Input, &Output, &Setpoint, 0.2, 0.0000, 0.007,  DIRECT);
-//PID forwardPID(&Input, &Output, &Setpoint, 0.3, 0, 0, DIRECT);
+//PID forwardPID(&Input, &Output, &Setpoint, 0.2, 0.0000, 0.007,  DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, 0.0268, 0, 0.0011, DIRECT);
 
 void setup() {
   Serial.begin(115200);
@@ -67,25 +68,17 @@ void setup() {
   //motorA.setPWM(speedA); 
   motorA.setPWM(0); 
   motorA.setDir(1);
-  
 }
 
 void loop(){
-  
-  //Setpoint = encoderTicksDesired;
-  Setpoint = 100; 
+
   Input = encoderAPos;
 
-//  Serial.println("hi");
-//  
-//  Serial.println("bye");
-//  
-//  Serial.println("hi");
-//  
-//  Serial.println("hi");
-//  Serial.println("hi");
-
   forwardPID.Compute();
+
+//  Serial.print(micros());
+//  Serial.print(",");
+  Serial.println(encoderAPos/100.0);
   
   if (Output == 0){
     if(stopFlag == 0){
@@ -94,7 +87,10 @@ void loop(){
       dir1Flag = 0;
       dir2Flag = 0; 
     }
-    pwm = 0; 
+    
+    motorA.setPWM(0);
+    while(true)
+      delay(20);
   }
   
   if (Output > 0){
