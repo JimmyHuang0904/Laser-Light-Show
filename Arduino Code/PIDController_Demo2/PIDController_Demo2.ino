@@ -15,11 +15,6 @@
 #define dirPinA2 10
 #define encPinA1 3
 #define encPinA2 2
-<<<<<<< Updated upstream
-
-#define resetPin 6
-=======
->>>>>>> Stashed changes
 
 /*
 #define enablePinA 9
@@ -48,7 +43,7 @@ int stopFlag = 0;
 int dir1Flag = 0;
 int dir2Flag = 0; 
 
-//double 
+
 
 double Input, Output, Setpoint;
 

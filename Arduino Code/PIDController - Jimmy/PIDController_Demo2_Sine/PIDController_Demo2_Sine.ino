@@ -64,7 +64,7 @@ void setup() {
 void loop(){
   timer = millis();
   currentTime = timer - startTime;
-  if( currentTime > 100){
+  if( currentTime > 150){
     startTime = millis(); 
 
     forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0
@@ -77,7 +77,8 @@ void loop(){
     dir1Flag = 0;
     dir2Flag = 0;
 
-    Setpoint = sin(timer)*50;
+    //Setpoint = sin(radians(timer))*50.0;
+    Setpoint = sin(timer)*50; 
     Serial.println(encoderAPos, DEC);
 //    Serial.println(sin(timer)*25);
 //    if ( switchFlag == 0 ){
