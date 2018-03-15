@@ -2,7 +2,6 @@
 //http://playground.arduino.cc/Main/RotaryEncoders#Intro
 //PWM from 0 to 255 for some reason
 
-
 #define enable 8
 #define dir1 11
 #define dir2 10
@@ -11,7 +10,6 @@
 #define pushDir 4
 #define encPinA 3
 #define encPinB 2
-
 
 int encoderA = 0;
 int encoderB = 0;
@@ -28,7 +26,8 @@ int speed = 0;
 int pwmOutput= 0; 
 
 volatile signed int encoder0Pos = 0;
-volatile double Time = 0; 
+volatile unsigned int curTime = 0;
+volatile unsigned int prevTime = 0; 
 volatile signed int Pos = 0; 
 
 void setup() {
@@ -54,16 +53,44 @@ void setup() {
   digitalWrite(dir2, LOW);
   digitalWrite(dir1, HIGH);
 
-  analogWrite(enable, 255); // Send PWM signal to L298N Enable pin
+  analogWrite(enable, 80); // Send PWM signal to L298N Enable pin
+  prevTime = 0; 
+  pwmOutput = 180;
 }
 
 void loop() {
+  
+  curTime = millis();
+  Serial.print(prevTime);
 
-  Time = micros();
-  Pos = encoder0Pos; 
-  Serial.print(Time);
+  digitalWrite(dir2, LOW);
+  digitalWrite(dir1, HIGH);
   Serial.print("   ");
-  Serial.println(Pos, DEC);
+  if( (curTime - prevTime) > 3000){
+    prevTime = curTime; 
+    pwmOutput += 10; 
+    digitalWrite(dir2, LOW);
+    digitalWrite(dir1, LOW);
+    delay(1000);
+    
+    if(pwmOutput > 250){
+      pwmOutput = 180; 
+      digitalWrite(dir2, LOW);
+      digitalWrite(dir1, LOW);
+      Serial.print("Reset \n");
+    }
+     
+  }
+ 
+  analogWrite(enable, pwmOutput);  
+  Pos = encoder0Pos; 
+  Serial.println(curTime);
+  Serial.print("   "); 
+  Serial.print(pwmOutput); 
+  //Serial.print("   ");
+  //Serial.println(Pos, DEC);
+
+   
 
 }
 

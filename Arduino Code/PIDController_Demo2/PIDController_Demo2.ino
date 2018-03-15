@@ -78,7 +78,7 @@ void loop(){
 
 //  Serial.print(micros());
 //  Serial.print(",");
-  Serial.println(encoderAPos/100.0);
+  Serial.println(encoderAPos);
   
   if (Output == 0){
     if(stopFlag == 0){
@@ -89,8 +89,7 @@ void loop(){
     }
     
     motorA.setPWM(0);
-    while(true)
-      delay(20);
+
   }
   
   if (Output > 0){
@@ -102,7 +101,7 @@ void loop(){
       
     }
     //pwm = Output;
-    pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
+    pwm = map(Output, 0, PID_UPPER_LIMIT, 200, 200);
   }
   else if (Output < 0){
     if(dir1Flag == 0){
@@ -112,9 +111,12 @@ void loop(){
       stopFlag=0; 
     }
     //pwm = -1*Output; 
-    pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
+    pwm = map(Output, 0, PID_LOWER_LIMIT, 200, 200);
   }
   motorA.setPWM(pwm);
+
+
+  //Serial.print(Input);
 
 }
 
