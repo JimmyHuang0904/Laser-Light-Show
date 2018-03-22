@@ -39,7 +39,7 @@ void setup() {
   pinMode(bit1, INPUT);
   pinMode(bit0, INPUT);
 
-  //pinMode(resetPin, INPUT);
+  //pinMode(resetPin, OUTPUT);
   pinMode(sel1Pin, OUTPUT);
   pinMode(OEPin, OUTPUT);
 }
