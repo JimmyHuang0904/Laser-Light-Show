@@ -45,14 +45,24 @@ int stopFlag = 0;
 int dir1Flag = 0;
 int dir2Flag = 0;
 
-Motor motorA(enablePinA, dirPinA1, dirPinA2);
+// Timer
+unsigned long timer =0;
+unsigned long currentTime = 0;
+unsigned long startTime = 0;
+unsigned int SampleTime = 75;
 
-PID forwardPID(&Input, &Output, &Setpoint, 0.0268, 0, 0.0011, DIRECT);
+const float pi = 3.1415926535;
+
+Motor motorA(enablePinA, dirPinA1, dirPinA2);
+//int16_t get_Encoder(void);
+
+//PID forwardPID(&Input, &Output, &Setpoint, 0.0268, 0, 0.0011, DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, 0.4, 0.002, 0.02, DIRECT);
 
 void setup() {
   result = 0;
 
-  Serial.begin(115200);
+  Serial.begin(2000000);
 
   digitalWrite(OEPin, 0); //enable OE (set to 0)
 
@@ -70,7 +80,7 @@ void setup() {
   pinMode(OEPin, OUTPUT);
 
   forwardPID.SetMode(AUTOMATIC);
-  forwardPID.SetSampleTime(2); 
+  forwardPID.SetSampleTime(2);
   forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
 
   motorA.setPWM(0); 
@@ -80,21 +90,30 @@ void setup() {
 void loop() {
 
   Input = get_Encoder();
-  Serial.println(Input);
+  timer = millis();
+  currentTime = timer - startTime;
+  if( currentTime > SampleTime){
+    startTime = millis();
+
+    forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0
+    forwardPID.SetOutputLimits(-1.0, 0.0);  // Forces maximum down to 0.0
+    forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);  // Set the limits back to normal
+    forwardPID.SetMode(MANUAL);
+    forwardPID.SetMode(AUTOMATIC);
+
+    Setpoint = sin(timer*pi/(SampleTime*10))*50;
+//    Serial.println(Setpoint);
+    Serial.println(Input);
+  }
+//  Serial.println(Input);
+
   forwardPID.Compute();
 
   if (Output == 0){
-    if(stopFlag == 0){
-      //motorA.hardStop();
-      stopFlag = 1;
-      dir1Flag = 0;
-      dir2Flag = 0; 
-    }
-    
+    dir1Flag = 0;
+    dir2Flag = 0;
     motorA.setPWM(0);
-  }
-  
-  if (Output > 0){
+  } else if (Output > 0){
     if(dir2Flag == 0){
       motorA.setDir(2);
       dir2Flag=1;
@@ -102,24 +121,21 @@ void loop() {
       stopFlag=0;
       
     }
-    //pwm = Output;
     pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
-  }
-  else if (Output < 0){
+  } else if (Output < 0){
     if(dir1Flag == 0){
       motorA.setDir(1);
       dir1Flag=1;
       dir2Flag=0;
       stopFlag=0; 
     }
-    //pwm = -1*Output; 
     pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
   }
   motorA.setPWM(pwm);
 }
 
-uint16_t get_Encoder(void){
-  uint16_t result = 0;
+inline int16_t get_Encoder(void){
+  int16_t result = 0;
 
   digitalWrite(sel1Pin,1); 
   bitWrite(result, 0, digitalRead(bit0));
@@ -140,6 +156,8 @@ uint16_t get_Encoder(void){
   bitWrite(result, 13, digitalRead(bit5));
   bitWrite(result, 14, digitalRead(bit6));
   bitWrite(result, 15, digitalRead(bit7));
+
+  result = result % 400;
 
   return result;
 }
