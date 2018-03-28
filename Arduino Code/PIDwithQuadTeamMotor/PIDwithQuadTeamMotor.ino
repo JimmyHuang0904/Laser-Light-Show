@@ -31,6 +31,8 @@
 
 #define PID_UPPER_LIMIT 255
 #define PID_LOWER_LIMIT -255
+#define MOTOR_LOWER_LIMIT 220
+#define MOTOR_UPPER_LIMIT 255
 
 byte thirdByte = 0;
 byte fourthByte = 0; 
@@ -49,7 +51,7 @@ int dir2Flag = 0;
 unsigned long timer =0;
 unsigned long currentTime = 0;
 unsigned long startTime = 0;
-unsigned int SampleTime = 75;
+unsigned int SampleTime = 10;
 
 const float pi = 3.1415926535;
 
@@ -57,7 +59,7 @@ Motor motorA(enablePinA, dirPinA1, dirPinA2);
 //int16_t get_Encoder(void);
 
 //PID forwardPID(&Input, &Output, &Setpoint, 0.0268, 0, 0.0011, DIRECT);
-PID forwardPID(&Input, &Output, &Setpoint, 0.4, 0.002, 0.02, DIRECT);
+PID forwardPID(&Input, &Output, &Setpoint, 4, 0.002, 0.05, DIRECT);
 
 void setup() {
   result = 0;
@@ -91,22 +93,23 @@ void setup() {
 void loop() {
 
   Input = get_Encoder();
-//  timer = millis();
-//  currentTime = timer - startTime;
-//  if( currentTime > SampleTime){
-//    startTime = millis();
-//
-//    forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0
-//    forwardPID.SetOutputLimits(-1.0, 0.0);  // Forces maximum down to 0.0
-//    forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);  // Set the limits back to normal
-//    forwardPID.SetMode(MANUAL);
-//    forwardPID.SetMode(AUTOMATIC);
-//
-//    Setpoint = sin(timer*pi/(SampleTime*10))*50;
-////    Serial.println(Setpoint);
-//    Serial.println(Input);
-//  }
-  Serial.println(Input);
+  timer = millis();
+  currentTime = timer - startTime;
+  if( currentTime > SampleTime){
+    startTime = millis();
+
+    forwardPID.SetOutputLimits(0.0, 1.0);  // Forces minimum up to 0.0
+    forwardPID.SetOutputLimits(-1.0, 0.0);  // Forces maximum down to 0.0
+    forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);  // Set the limits back to normal
+    forwardPID.SetMode(MANUAL);
+    forwardPID.SetMode(AUTOMATIC);
+
+    Setpoint = sin(timer*pi/(SampleTime*10))*50;
+    Serial.print(Setpoint);
+    Serial.print(" ");
+    Serial.println(Input);
+  }
+//  Serial.println(Input);
 
   forwardPID.Compute();
 
@@ -122,7 +125,7 @@ void loop() {
       stopFlag=0;
       
     }
-    pwm = map(Output, 0, PID_UPPER_LIMIT, 30, 200);
+    pwm = map(Output, 0, PID_UPPER_LIMIT, MOTOR_LOWER_LIMIT, MOTOR_UPPER_LIMIT);
   } else if (Output < 0){
     if(dir1Flag == 0){
       motorA.setDir(1);
@@ -130,7 +133,7 @@ void loop() {
       dir2Flag=0;
       stopFlag=0; 
     }
-    pwm = map(Output, 0, PID_LOWER_LIMIT, 30, 200);
+    pwm = map(Output, 0, PID_LOWER_LIMIT, MOTOR_LOWER_LIMIT, MOTOR_UPPER_LIMIT);
   }
   motorA.setPWM(pwm);
 }
@@ -158,7 +161,7 @@ inline int16_t get_Encoder(void){
   bitWrite(result, 14, digitalRead(bit6));
   bitWrite(result, 15, digitalRead(bit7));
 
-  result = result % 400;
+  //result = result % 400;
 
   return result;
 }
