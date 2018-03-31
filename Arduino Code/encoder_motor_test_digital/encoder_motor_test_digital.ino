@@ -49,15 +49,15 @@ void setup() {
 
 void loop() {
 
-  encoderA = digitalRead(encPinA);
-  encoderB = digitalRead(encPinB);
+  //encoderA = digitalRead(encPinA);
+  //encoderB = digitalRead(encPinB);
 
   //Serial.print(encoder0Pos);
   Serial.println(encoder0Pos, DEC);
   Serial.print("value: \n");
   //Serial.println(encoderA);
   //Serial.println(encoderB);
-
+/*
   //debounce and read speed button 
   if (digitalRead(pushSpd) == true) {
     pressedSpd = true;
@@ -101,7 +101,7 @@ void loop() {
     rotDirection = 0;
     delay(20);
   }
-
+*/
 }
 
 void doEncoderA() {

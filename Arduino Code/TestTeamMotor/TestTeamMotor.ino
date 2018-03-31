@@ -59,13 +59,13 @@ void setup() {
 }
 
 void loop() {
-  
+  pwmOutput = 100; 
   curTime = millis();
   Serial.print(prevTime);
 
   digitalWrite(dir2, LOW);
   digitalWrite(dir1, HIGH);
-  Serial.print("   ");
+  /*Serial.print("   ");
   if( (curTime - prevTime) > 3000){
     prevTime = curTime; 
     pwmOutput += 10; 
@@ -79,7 +79,7 @@ void loop() {
       digitalWrite(dir1, LOW);
       Serial.print("Reset \n");
     }
-     
+     */
   }
  
   analogWrite(enable, pwmOutput);  

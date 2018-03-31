@@ -13,8 +13,8 @@
 #define enablePinA 8
 #define dirPinA1 11
 #define dirPinA2 10
-#define encPinA1 3
-#define encPinA2 2
+#define encPinA1 6
+#define encPinA2 5
 
 /*
 #define enablePinA 9

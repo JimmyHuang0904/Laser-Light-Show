@@ -93,7 +93,7 @@ void setup() {
 void loop() {
 
   Input = get_Encoder();
-  timer = millis();
+ /* timer = millis();
   currentTime = timer - startTime;
   if( currentTime > SampleTime){
     startTime = millis();
@@ -109,7 +109,8 @@ void loop() {
     Serial.print(" ");
     Serial.println(Input);
   }
-//  Serial.println(Input);
+  */
+  Serial.println(Input);
 
   forwardPID.Compute();
 
