@@ -12,18 +12,17 @@
 /*                            */
 
 // 8 bit decoder
-#define bit0_7 53
-#define bit0_6 52
-#define bit0_5 51
-#define bit0_4 50
-#define bit0_3 49
-#define bit0_2 48
-#define bit0_1 47
-#define bit0_0 46
+#define bit0_7 37
+#define bit0_6 36
+#define bit0_5 35
+#define bit0_4 34
+#define bit0_3 33
+#define bit0_2 32
+#define bit0_1 31
+#define bit0_0 30
 
-// Sel and enable for 8 bit decoder
-#define sel1Pin_0 42
-#define OEPin_0 43
+#define sel1Pin_0 26
+#define OEPin_0 27
 
 #define reset0 4
 
@@ -43,17 +42,18 @@
 /*                            */ 
 
 // 8 bit decoder
-#define bit1_7 37
-#define bit1_6 36
-#define bit1_5 35
-#define bit1_4 34
-#define bit1_3 33
-#define bit1_2 32
-#define bit1_1 31
-#define bit1_0 30
+#define bit1_7 53
+#define bit1_6 52
+#define bit1_5 51
+#define bit1_4 50
+#define bit1_3 49
+#define bit1_2 48
+#define bit1_1 47
+#define bit1_0 46
 
-#define sel1Pin_1 26
-#define OEPin_1 27
+// Sel and enable for 8 bit decoder
+#define sel1Pin_1 42
+#define OEPin_1 43
 
 #define reset1 3
 
