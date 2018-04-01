@@ -7,11 +7,6 @@
 #include "Motor.h"
 #include <PID_v1.h>
 
-//typedef unsigned char      uint8_t;
-//typedef unsigned short     uint16_t;
-//typedef unsigned long      uint32_t;
-//typedef unsigned long long uint64_t;
-
 #define bit7 53
 #define bit6 52
 #define bit5 51
@@ -25,13 +20,14 @@
 #define dirPinA1 11
 #define dirPinA2 10
 
-//#define resetPin 41   //have set to always high right now (never reset)
 #define sel1Pin 42
 #define OEPin 43
 
+#define reset1 4
+
 #define PID_UPPER_LIMIT 255
 #define PID_LOWER_LIMIT -255
-#define MOTOR_LOWER_LIMIT 220
+#define MOTOR_LOWER_LIMIT 170
 #define MOTOR_UPPER_LIMIT 255
 
 unsigned int result = 0;
@@ -49,7 +45,7 @@ int dir2Flag = 0;
 unsigned long timer =0;
 unsigned long currentTime = 0;
 unsigned long startTime = 0;
-unsigned int SampleTime = 25;
+unsigned int SampleTime = 35;
 
 const float pi = 3.1415926535;
 
@@ -57,11 +53,11 @@ Motor motorA(enablePinA, dirPinA1, dirPinA2);
 //int16_t get_Encoder(void);
 
 //PID forwardPID(&Input, &Output, &Setpoint, 0.0268, 0, 0.0011, DIRECT);
-PID forwardPID(&Input, &Output, &Setpoint, 3, 0.002, 0.05, DIRECT);
+
+// Bottom Motor PID
+PID forwardPID(&Input, &Output, &Setpoint, 4, 0.002, 0.1, DIRECT);
 
 void setup() {
-  result = 0;
-
   Serial.begin(2000000);
 
   digitalWrite(OEPin, 0); //enable OE (set to 0)
@@ -79,19 +75,21 @@ void setup() {
   pinMode(sel1Pin, OUTPUT);
   pinMode(OEPin, OUTPUT);
 
+  pinMode(reset1, INPUT);
+
   forwardPID.SetMode(AUTOMATIC);
-  forwardPID.SetSampleTime(2);
+  forwardPID.SetSampleTime(1);
   forwardPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   forwardPID.nFilter = 1;
 
-  motorA.setPWM(0); 
-  motorA.setDir(1);
+  
+  initialize();
 }
 
 void loop() {
 
   Input = get_Encoder();
- /* timer = millis();
+  timer = millis();
   currentTime = timer - startTime;
   if( currentTime > SampleTime){
     startTime = millis();
@@ -102,14 +100,18 @@ void loop() {
     forwardPID.SetMode(MANUAL);
     forwardPID.SetMode(AUTOMATIC);
 
-    Setpoint = sin(timer*pi/(SampleTime*10))*25;
+    Setpoint = sin(timer*pi/(SampleTime*10))*50;
+    
     Serial.print(Setpoint);
     Serial.print(" ");
     Serial.println(Input);
   }
-  */
-  Serial.println(Input);
+//  Serial.print(" ");
+//  Serial.println(Output);
+//  Serial.print(" ");
+//  Serial.println(Input);
 
+//  Serial.println(Input);
   forwardPID.Compute();
 
   if (Output == 0){
@@ -125,6 +127,7 @@ void loop() {
       
     }
     pwm = map(Output, 0, PID_UPPER_LIMIT, MOTOR_LOWER_LIMIT, MOTOR_UPPER_LIMIT);
+    motorA.setPWM(pwm);
   } else if (Output < 0){
     if(dir1Flag == 0){
       motorA.setDir(1);
@@ -133,8 +136,8 @@ void loop() {
       stopFlag=0; 
     }
     pwm = map(Output, 0, PID_LOWER_LIMIT, MOTOR_LOWER_LIMIT, MOTOR_UPPER_LIMIT);
+    motorA.setPWM(pwm);
   }
-  motorA.setPWM(pwm);
 }
 
 inline int16_t get_Encoder(void){
@@ -165,4 +168,11 @@ inline int16_t get_Encoder(void){
   return result;
 }
 
+void initialize(void){
+  motorA.setDir(1);
+  motorA.setPWM(MOTOR_LOWER_LIMIT);
+  while(digitalRead(reset1) == true){
+    Serial.println("asdf");
+  }
+}
 
