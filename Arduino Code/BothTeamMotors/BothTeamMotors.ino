@@ -14,14 +14,19 @@
 double Input, Output;
 double Setpoint = 100;
 
-/*     Top Motor      */
-double Input1, Output1;
-double Setpoint1 = 100;
-
 int pwm =0;
 int stopFlag = 0;
 int dir1Flag = 0;
 int dir2Flag = 0;
+
+/*     Top Motor      */
+double Input1, Output1;
+double Setpoint1 = 100;
+
+int pwm1 = 0;
+int stopFlag1 = 0;
+int dir1Flag1 = 0;
+int dir2Flag1 = 0;
 
 // Timer
 unsigned long timer =0;
@@ -87,7 +92,13 @@ void setup() {
   bottomPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   bottomPID.nFilter = 1;
 
-  initialize();
+  // PID
+  topPID.SetMode(AUTOMATIC);
+  topPID.SetSampleTime(1);
+  topPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
+  topPID.nFilter = 1;
+
+//  initialize();
 }
 
 void loop() {
@@ -117,6 +128,11 @@ void loop() {
   Serial.print(" Top Motor Input: ");
   Serial.println(Input1);
 
+  bottomMotorLogic();
+//  topMotorLogic();
+}
+
+inline void bottomMotorLogic(void){
   bottomPID.Compute();
 
   if (Output == 0){
@@ -142,6 +158,36 @@ void loop() {
     }
     pwm = map(Output, 0, PID_LOWER_LIMIT, MOTOR_LOWER_LIMIT, MOTOR_UPPER_LIMIT);
     motorA.setPWM(pwm);
+  }
+}
+
+inline void topMotorLogic(void){
+  topPID.Compute();
+
+  if (Output1 == 0){
+    dir1Flag1 = 0;
+    dir2Flag1 = 0;
+    motorB.setPWM(0);
+  } else if (Output1 > 0){
+    if(dir2Flag1 == 0){
+      motorB.setDir(2);
+      dir2Flag1 =1;
+      dir1Flag1 =0;
+      stopFlag1 =0;
+      
+    }
+    pwm1 = map(Output1, 0, PID_UPPER_LIMIT, MOTOR_LOWER_LIMIT, MOTOR_UPPER_LIMIT);
+    motorB.setPWM(pwm1);
+  } else if (Output1 < 0){
+    if(dir1Flag1 == 0){
+      motorB.setDir(1);
+      dir1Flag1 =1;
+      dir2Flag1 =0;
+      stopFlag1 =0; 
+    }
+    pwm1 = map(Output1, 0, PID_LOWER_LIMIT, MOTOR_LOWER_LIMIT, MOTOR_UPPER_LIMIT);
+    motorB.setPWM(pwm1);
+
   }
 }
 
@@ -197,7 +243,6 @@ inline int16_t get_Encoder1(void){
   bitWrite(result, 14, digitalRead(bit1_6));
   bitWrite(result, 15, digitalRead(bit1_7));
 
-  //result = result % 400;
 //  Serial.print(result, BIN);
 //  Serial.print(" ");
 //  Serial.println(result, DEC);
