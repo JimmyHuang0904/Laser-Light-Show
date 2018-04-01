@@ -117,8 +117,8 @@ void loop() {
     bottomPID.SetMode(MANUAL);
     bottomPID.SetMode(AUTOMATIC);
 
-    Setpoint = sin(timer*pi/(SampleTime*10))*25 + 85;
-    Setpoint1 = sin(timer*pi/(SampleTime*10))*25 + 80;
+    Setpoint = cos(timer*pi/(SampleTime*10))*25 + 54;
+    Setpoint1 = sin(timer*pi/(SampleTime*10))*25 + 67;
     
     Serial.print(Setpoint1);
     Serial.print(" ");
@@ -254,13 +254,13 @@ inline int16_t get_Encoder1(void){
 void initialize(void){
   motorB.setPWM(0);
 
-//  motorA.setDir(1);
-//  motorA.setPWM(255);
-//  while(digitalRead(reset0) == true){
-//    delay(1);
-//  }
-//  motorA.setPWM(0);
-//  Serial.println(get_Encoder0());
+  motorA.setDir(1);
+  motorA.setPWM(255);
+  while(digitalRead(reset0) == true){
+    delay(1);
+  }
+  motorA.setPWM(0);
+  Serial.println(get_Encoder0());
 
   motorB.setDir(1);
   motorB.setPWM(255);
