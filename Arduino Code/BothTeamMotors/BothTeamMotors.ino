@@ -214,9 +214,9 @@ inline int16_t get_Encoder0(void){
   bitWrite(result, 14, digitalRead(bit0_6));
   bitWrite(result, 15, digitalRead(bit0_7));
 
-//  Serial.print(result, BIN);
-//  Serial.print(" ");
-//  Serial.println(result, DEC);
+  Serial.print(result, BIN);
+  Serial.print(" ");
+  Serial.println(result, DEC);
   return result;
 }
 
@@ -242,23 +242,33 @@ inline int16_t get_Encoder1(void){
   bitWrite(result, 13, digitalRead(bit1_5));
   bitWrite(result, 14, digitalRead(bit1_6));
   bitWrite(result, 15, digitalRead(bit1_7));
-
-  Serial.print(result, BIN);
-  Serial.print(" ");
-  Serial.println(result, DEC);
+//
+//  Serial.print(result, BIN);
+//  Serial.print(" ");
+//  Serial.println(result, DEC);
   return result;
 }
 
 void initialize(void){
-  motorB.setDir(1);
-  motorB.setPWM(MOTOR_LOWER_LIMIT);
-  while(digitalRead(reset1) == true){
+  motorA.setDir(1);
+  motorA.setPWM(MOTOR_LOWER_LIMIT);
+  while(digitalRead(reset0) == true){
     Serial.println("asdf");
   }
-  motorB.setPWM(0); 
-  double in = get_Encoder1(); 
-  Serial.println("Top Motor Homed"); 
+  motorA.setPWM(0); 
+  double in = get_Encoder0(); 
+  Serial.println("Bottom Motor Homed"); 
   Serial.println(in); 
+  
+//  motorB.setDir(1);
+//  motorB.setPWM(MOTOR_LOWER_LIMIT);
+//  while(digitalRead(reset1) == true){
+//    Serial.println("asdf");
+//  }
+//  motorB.setPWM(0); 
+//  double in = get_Encoder1(); 
+//  Serial.println("Top Motor Homed"); 
+//  Serial.println(in); 
 }
 
 
