@@ -36,7 +36,7 @@ unsigned int SampleTime = 35;
 
 const float pi = 3.1415926535;
 
-Motor motorA(enablePinA_0, dirPinA1_0, dirPinA2_0);
+Motor motorA(enablePinA_0, dirPinA1_0, dirPinA2_0); //bottom motor???
 Motor motorB(enablePinA_1, dirPinA1_1, dirPinA2_1);
 
 // Bottom Motor PID
@@ -46,7 +46,7 @@ PID bottomPID(&Input, &Output, &Setpoint, 4, 0.002, 0.1, DIRECT);
 PID topPID(&Input1, &Output1, &Setpoint1, 4, 0.002, 0.1, DIRECT);
 
 void setup() {
-  Serial.begin(2000000);
+  Serial.begin(9600);
 
   /*              */
   /* Bottom Motor */
@@ -98,7 +98,7 @@ void setup() {
   topPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
   topPID.nFilter = 1;
 
-//  initialize();
+  initialize();
 }
 
 void loop() {
@@ -123,10 +123,10 @@ void loop() {
 //    Serial.println(Input);
 //  }
 //
-  Serial.print("Bottom Motor Input: ");
-  Serial.print(Input);
-  Serial.print(" Top Motor Input: ");
-  Serial.println(Input1);
+//  Serial.print("Bottom Motor Input: ");
+//  Serial.print(Input);
+//  Serial.print(" Top Motor Input: ");
+//  Serial.println(Input1);
 
   bottomMotorLogic();
 //  topMotorLogic();
@@ -243,18 +243,22 @@ inline int16_t get_Encoder1(void){
   bitWrite(result, 14, digitalRead(bit1_6));
   bitWrite(result, 15, digitalRead(bit1_7));
 
-//  Serial.print(result, BIN);
-//  Serial.print(" ");
-//  Serial.println(result, DEC);
+  Serial.print(result, BIN);
+  Serial.print(" ");
+  Serial.println(result, DEC);
   return result;
 }
 
 void initialize(void){
-  motorA.setDir(1);
-  motorA.setPWM(MOTOR_LOWER_LIMIT);
-  while(digitalRead(reset0) == true){
+  motorB.setDir(1);
+  motorB.setPWM(MOTOR_LOWER_LIMIT);
+  while(digitalRead(reset1) == true){
     Serial.println("asdf");
   }
+  motorB.setPWM(0); 
+  double in = get_Encoder1(); 
+  Serial.println("Top Motor Homed"); 
+  Serial.println(in); 
 }
 
 
