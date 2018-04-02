@@ -12,16 +12,16 @@
 /*  PID Declarations  */
 /*    Bottom Motor    */
 double Input, Output;
-double Setpoint = 100;
+double Setpoint;
 
-int pwm =0;
+int pwm = 0;
 int stopFlag = 0;
 int dir1Flag = 0;
 int dir2Flag = 0;
 
 /*     Top Motor      */
 double Input1, Output1;
-double Setpoint1 = 100;
+double Setpoint1;
 
 int pwm1 = 0;
 int stopFlag1 = 0;
@@ -32,7 +32,7 @@ int dir2Flag1 = 0;
 unsigned long timer =0;
 unsigned long currentTime = 0;
 unsigned long startTime = 0;
-unsigned int SampleTime = 20;
+unsigned int SampleTime = 25;
 
 const float pi = 3.1415926535;
 
@@ -40,11 +40,12 @@ Motor motorA(enablePinA_0, dirPinA1_0, dirPinA2_0);
 Motor motorB(enablePinA_1, dirPinA1_1, dirPinA2_1);
 
 // Bottom Motor PID
-PID bottomPID(&Input, &Output, &Setpoint, 4, 0.002, 0.1, DIRECT);
+PID bottomPID(&Input, &Output, &Setpoint, 7, 0.002, 0.1, DIRECT);
 
 // Top Motor PID
 //PID topPID(&Input1, &Output1, &Setpoint1, 7, 0.002, 0.08, DIRECT);
 PID topPID(&Input1, &Output1, &Setpoint1, 7, 0.002, 1, DIRECT);
+//PID topPID(&Input1, &Output1, &Setpoint1, 8, 0.1, 8, DIRECT); // SampleTime = 15
 
 void setup() {
   Serial.begin(2000000);
@@ -117,18 +118,18 @@ void loop() {
     bottomPID.SetMode(MANUAL);
     bottomPID.SetMode(AUTOMATIC);
 
-    Setpoint = cos(timer*pi/(SampleTime*10))*25 + 54;
-    Setpoint1 = sin(timer*pi/(SampleTime*10))*25 + 67;
+    Setpoint = cos(timer*pi/(SampleTime*10))*18 + 100;
+    Setpoint1 = sin(timer*pi/(SampleTime*10))*18 + 35;
     
     Serial.print(Setpoint1);
     Serial.print(" ");
     Serial.println(Input1);
   }
 
-  Serial.print("Bottom Motor Input: ");
-  Serial.print(Input);
-  Serial.print(" Top Motor Input: ");
-  Serial.println(Input1);
+//  Serial.print("Bottom Motor Input: ");
+//  Serial.print(Input);
+//  Serial.print(" Top Motor Input: ");
+//  Serial.println(Input1);
 
   bottomMotorLogic();
   topMotorLogic();
@@ -273,6 +274,7 @@ void initialize(void){
 //  while(true);
 //    delay(20);
 }
+
 
 
 
