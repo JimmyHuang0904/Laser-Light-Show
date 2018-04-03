@@ -46,6 +46,8 @@ AmpSat0 = 12;
 % Electrical Motor Dynamics
 Elec0n  = [1];               % Numerator
 Elec0d  = [.002383 8];               % Denominator
+L0 = .002382;
+R0 = 8;
 
 % Torque Const & Back EMF
 TConst0  = 0.074557;
@@ -55,6 +57,10 @@ BackEMF0 = 0.074557;
 Mech0n  = [1];               % Numerator
 Mech0d  = [.022033 .001361005];               % Denominator
 JntSat0 =  Big;
+J0 = .022033;
+B0 = .001361005; 
+%B0 = .013; 
+
 
 % Sensor Dynamics
 Sens0    =  0;
@@ -99,7 +105,11 @@ StFric1 = 0;
 % ==================
 % TRANSFER FUNCTIONS
 % ==================
-myTF = tf(TConst1, [ (L*J), (L*B + J*R), (B*R + TConst1*BackEMF1)] ); 
-stepplot(myTF); 
-display(myTF); 
+myTF0 = tf(TConst0, [ (L0*J0), (L0*B0 + J0*R0), (B0*R0 + TConst0*BackEMF0)] ); 
+stepplot(myTF0); 
+display(myTF0);
+
+%myTF = tf(TConst1, [ (L*J), (L*B + J*R), (B*R + TConst1*BackEMF1)] ); 
+%stepplot(myTF); 
+%display(myTF); 
 % You may prefer to put this section in a separate .m file

@@ -34,7 +34,7 @@ int dir2Flag1 = 0;
 unsigned long timer =0;
 unsigned long currentTime = 0;
 unsigned long startTime = 0;
-unsigned int SampleTime = 25;
+unsigned int SampleTime = 1000;
 
 const float pi = 3.1415926535;
 
@@ -46,15 +46,15 @@ Motor motorA(enablePinA_0, dirPinA1_0, dirPinA2_0);
 Motor motorB(enablePinA_1, dirPinA1_1, dirPinA2_1);
 
 // Bottom Motor PID
-PID bottomPID(&Input, &Output, &Setpoint, 7, 0.002, 0.1, DIRECT);
+PID bottomPID(&Input, &Output, &Setpoint, 75, 0.02, 5, DIRECT);
 
 // Top Motor PID
 //PID topPID(&Input1, &Output1, &Setpoint1, 7, 0.002, 0.08, DIRECT);
-PID topPID(&Input1, &Output1, &Setpoint1, 7, 0.002, 1, DIRECT);
-//PID topPID(&Input1, &Output1, &Setpoint1, 8, 0.1, 8, DIRECT); // SampleTime = 15
+//PID topPID(&Input1, &Output1, &Setpoint1, 7, 0.002, 1, DIRECT);
+PID topPID(&Input1, &Output1, &Setpoint1, 2800, 600, 40, DIRECT); // SampleTime = 15
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(2000000);
 
   /*              */
   /* Bottom Motor */
@@ -98,17 +98,17 @@ void setup() {
   bottomPID.SetMode(AUTOMATIC);
   bottomPID.SetSampleTime(1);
   bottomPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
-  bottomPID.nFilter = 1;
+  bottomPID.nFilter = 50;
 
   // PID
   topPID.SetMode(AUTOMATIC);
   topPID.SetSampleTime(1);
   topPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
-  topPID.nFilter = 1;
+  topPID.nFilter = 50;
 
   pointIndex = 0; 
 
-  //initialize();
+  initialize();
 }
 
 void loop() {
@@ -126,8 +126,8 @@ void loop() {
     bottomPID.SetMode(MANUAL);
     bottomPID.SetMode(AUTOMATIC);
 
-	  Setpoint = tickX[pointIndex];
-    Setpoint1 = tickY[pointIndex];
+	  Setpoint = tickX[pointIndex] + 20;
+    Setpoint1 = tickY[pointIndex] + 20;
     pointIndex++; 
     if(pointIndex >= PSIZE){
       pointIndex = 0; 
@@ -274,7 +274,7 @@ void initialize(void){
   motorA.setDir(1);
   motorA.setPWM(255);
   while(digitalRead(reset0) == true){
-    delay(1);
+    Serial.println("Homing first");
   }
   motorA.setPWM(0);
   Serial.println(get_Encoder0());
@@ -282,7 +282,7 @@ void initialize(void){
   motorB.setDir(1);
   motorB.setPWM(255);
   while(digitalRead(reset1) == true){
-    delay(1);
+    Serial.println("Homing second");
   }
   motorB.setPWM(0);
   Serial.println(get_Encoder1());
