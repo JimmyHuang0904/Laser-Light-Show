@@ -32,7 +32,7 @@ int dir2Flag1 = 0;
 unsigned long timer =0;
 unsigned long currentTime = 0;
 unsigned long startTime = 0;
-unsigned int SampleTime = 25;
+unsigned int SampleTime = 7;
 
 const float pi = 3.1415926535;
 
@@ -44,8 +44,10 @@ PID bottomPID(&Input, &Output, &Setpoint, 7, 0.002, 0.1, DIRECT);
 
 // Top Motor PID
 //PID topPID(&Input1, &Output1, &Setpoint1, 7, 0.002, 0.08, DIRECT);
-PID topPID(&Input1, &Output1, &Setpoint1, 7, 0.002, 1, DIRECT);
-//PID topPID(&Input1, &Output1, &Setpoint1, 8, 0.1, 8, DIRECT); // SampleTime = 15
+//PID topPID(&Input1, &Output1, &Setpoint1, 7, 0.002, 1, DIRECT);
+//PID topPID(&Input1, &Output1, &Setpoint1, 7000, 0.4, 10000, DIRECT); // SampleTime = 15, 15 samples per period
+//PID topPID(&Input1, &Output1, &Setpoint1, 7000, 0.4, 12000, DIRECT); // SampleTime = 10, 15 samples per period
+PID topPID(&Input1, &Output1, &Setpoint1, 90000, 100000, 10000, DIRECT); // SampleTime = 7, 15 samples per period
 
 void setup() {
   Serial.begin(2000000);
@@ -97,7 +99,7 @@ void setup() {
   // PID
   topPID.SetMode(AUTOMATIC);
   topPID.SetSampleTime(1);
-  topPID.SetOutputLimits(PID_LOWER_LIMIT, PID_UPPER_LIMIT);
+  topPID.SetOutputLimits(PID_LOWER_LIMIT_1, PID_UPPER_LIMIT_1);
   topPID.nFilter = 1;
 
   initialize();
@@ -118,12 +120,13 @@ void loop() {
     bottomPID.SetMode(MANUAL);
     bottomPID.SetMode(AUTOMATIC);
 
-    Setpoint = cos(timer*pi/(SampleTime*10))*18 + 100;
-    Setpoint1 = sin(timer*pi/(SampleTime*10))*18 + 35;
+    Setpoint = cos(timer*pi/(SampleTime*15))*18 + 100;
+    Setpoint1 = sin(timer*pi/(SampleTime*15))*18 + 60;
     
     Serial.print(Setpoint1);
     Serial.print(" ");
     Serial.println(Input1);
+//    Serial.println(Output1);
   }
 
 //  Serial.print("Bottom Motor Input: ");
@@ -179,7 +182,7 @@ inline void topMotorLogic(void){
       stopFlag1 =0;
       
     }
-    pwm1 = map(Output1, 0, PID_UPPER_LIMIT, MOTOR_LOWER_LIMIT_1, MOTOR_UPPER_LIMIT);
+    pwm1 = map(Output1, 0, PID_UPPER_LIMIT_1, MOTOR_LOWER_LIMIT_1, MOTOR_UPPER_LIMIT_1);
     motorB.setPWM(pwm1);
   } else if (Output1 < 0){
     if(dir1Flag1 == 0){
@@ -188,7 +191,7 @@ inline void topMotorLogic(void){
       dir2Flag1 =0;
       stopFlag1 =0; 
     }
-    pwm1 = map(Output1, 0, PID_LOWER_LIMIT, MOTOR_LOWER_LIMIT_1, MOTOR_UPPER_LIMIT);
+    pwm1 = map(Output1, 0, PID_LOWER_LIMIT_1, MOTOR_LOWER_LIMIT_1, MOTOR_UPPER_LIMIT_1);
     motorB.setPWM(pwm1);
 
   }
@@ -255,13 +258,13 @@ inline int16_t get_Encoder1(void){
 void initialize(void){
   motorB.setPWM(0);
 
-  motorA.setDir(1);
-  motorA.setPWM(255);
-  while(digitalRead(reset0) == true){
-    delay(1);
-  }
-  motorA.setPWM(0);
-  Serial.println(get_Encoder0());
+//  motorA.setDir(1);
+//  motorA.setPWM(255);
+//  while(digitalRead(reset0) == true){
+//    delay(1);
+//  }
+//  motorA.setPWM(0);
+//  Serial.println(get_Encoder0());
 
   motorB.setDir(1);
   motorB.setPWM(255);

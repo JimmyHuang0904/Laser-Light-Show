@@ -69,3 +69,4 @@ long Motor::getRotSpeed(int interval, unsigned long deg)
 	*/
 }
 
+

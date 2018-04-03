@@ -61,8 +61,11 @@
 #define dirPinA1_1 6
 #define dirPinA2_1 5
 
-#define MOTOR_LOWER_LIMIT_1 215
+#define PID_UPPER_LIMIT_1 255
+#define PID_LOWER_LIMIT_1 -255
+#define MOTOR_LOWER_LIMIT_1 200 //215
 #define MOTOR_UPPER_LIMIT_1 255
 
 #endif
+
 
