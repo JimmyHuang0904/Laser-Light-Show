@@ -6,6 +6,7 @@
 #include "Arduino.h"
 #include "Motor.h"
 #include "global_vars.h"
+#include "setpoint_gen.h"
 
 #include <PID_v1.h>
 
@@ -32,7 +33,9 @@ int dir2Flag1 = 0;
 unsigned long timer =0;
 unsigned long currentTime = 0;
 unsigned long startTime = 0;
-unsigned int SampleTime = 5;
+unsigned int SampleTime = 15; // sample time 20 is good
+
+int pointIndex = 0;
 
 int n_filter = 10;
 
@@ -122,19 +125,17 @@ void loop() {
     bottomPID.SetMode(MANUAL);
     bottomPID.SetMode(AUTOMATIC);
 
-    Setpoint = cos(timer*pi/(SampleTime*10))*15 + 30;
-    Setpoint1 = sin(timer*pi/(SampleTime*10))*15 + 20;
-    
-//    Serial.print(Setpoint1);
-//    Serial.print(" ");
-//    Serial.println(Input1);
-//    Serial.println(Output1);
-  }
+//    Setpoint = cos(timer*pi/(SampleTime*10))*15 + 30;
+//    Setpoint1 = sin(timer*pi/(SampleTime*10))*15 + 20;
 
-  Serial.print("Bottom Motor Input: ");
-  Serial.print(Input);
-  Serial.print(" Top Motor Input: ");
-  Serial.println(Input1);
+    Setpoint  = setpoint_x[pointIndex] + 30;
+    Setpoint1 = setpoint_y[pointIndex] + 20;
+    pointIndex++; 
+    if(pointIndex >= SIZE_OF_ARR ){
+      pointIndex = 0; 
+    }
+
+  }
 
   bottomMotorLogic();
   topMotorLogic();
