@@ -6,6 +6,26 @@
 #include "Arduino.h"
 #include "Motor.h"
 #include <PID_v1.h>
+/*
+#define bit7 37
+#define bit6 36
+#define bit5 35
+#define bit4 34
+#define bit3 33
+#define bit2 32
+#define bit1 31
+#define bit0 30
+
+#define sel1Pin 26
+#define OEPin 27
+
+#define reset 4
+
+// Slot detector
+#define enablePinA 8
+#define dirPinA1 11
+#define dirPinA2 10
+*/
 
 #define bit7 53
 #define bit6 52
@@ -16,13 +36,15 @@
 #define bit1 47
 #define bit0 46
 
-#define enablePinA 8
-#define dirPinA1 11
-#define dirPinA2 10
-
-//#define resetPin 41   //have set to always high right now (never reset)
+// Sel and enable for 8 bit decoder
 #define sel1Pin 42
 #define OEPin 43
+
+#define reset1 3
+
+#define enablePinA 7
+#define dirPinA1 6
+#define dirPinA2 5
 unsigned int result = 0;
 
 int pwm =0;

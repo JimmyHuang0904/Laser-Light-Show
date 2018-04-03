@@ -1,0 +1,3 @@
+# exclude autosave files
+*.asv
+*.SimulinkProject
